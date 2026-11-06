@@ -25,6 +25,8 @@ public final class ErrorCode {
 	public static final String BOOKING_ALREADY_STARTED = "BOOKING_ALREADY_STARTED";
 	public static final String EVENT_CANNOT_BE_CANCELLED = "EVENT_CANNOT_BE_CANCELLED";
 	public static final String UNSUPPORTED_MEDIA_TYPE = "UNSUPPORTED_MEDIA_TYPE";
+	public static final String METHOD_NOT_ALLOWED = "METHOD_NOT_ALLOWED";
+	public static final String NOT_ACCEPTABLE = "NOT_ACCEPTABLE";
 	public static final String CONFLICT = "CONFLICT";
 	public static final String INTERNAL_ERROR = "INTERNAL_ERROR";
 

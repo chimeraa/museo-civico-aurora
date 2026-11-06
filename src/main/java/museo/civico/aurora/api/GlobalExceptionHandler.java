@@ -10,7 +10,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -80,6 +82,19 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorEnvelope> handleNotFound(NoResourceFoundException ex) {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND)
 				.body(new ErrorEnvelope(ErrorCode.NOT_FOUND, "Risorsa non trovata."));
+	}
+
+	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+	public ResponseEntity<ErrorEnvelope> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+		return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+				.body(new ErrorEnvelope(ErrorCode.METHOD_NOT_ALLOWED, "Metodo HTTP non supportato per questa risorsa."));
+	}
+
+	@ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
+	public ResponseEntity<ErrorEnvelope> handleNotAcceptable(HttpMediaTypeNotAcceptableException ex) {
+		return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
+				.body(new ErrorEnvelope(ErrorCode.NOT_ACCEPTABLE,
+						"Nessuna rappresentazione disponibile per il formato richiesto."));
 	}
 
 	@ExceptionHandler(Exception.class)

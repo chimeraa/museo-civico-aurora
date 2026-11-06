@@ -1,10 +1,10 @@
 # Contratto API — Aurora Cultura
 
-> **Stato:** contratto v1 approvato da Oracle per la prima implementazione. Questa specifica è l'unica fonte del contratto per frontend e backend; le modifiche successive devono aggiornare prima questo documento e annotare la motivazione.
+> **Stato:** contratto v1 stabile e condiviso tra frontend e backend per la prima implementazione. Questa specifica è l'unica fonte del contratto; le modifiche successive devono aggiornare prima questo documento e annotare la motivazione.
 
 ## 1. Scopo e perimetro MVP
 
-Prototipo per il museo simulato **Museo Civico Aurora** (nome provvisorio), sviluppato con Java 21, Spring Boot 4.1.1 / Spring Security 7.1.1, PostgreSQL 17 e frontend HTML/CSS/JavaScript servito dalla stessa applicazione.
+Prototipo per il museo simulato **Museo Civico Aurora**, sviluppato con Java 21, Spring Boot 4.1.1 / Spring Security 7.1.1, PostgreSQL 17 e frontend HTML/CSS/JavaScript servito dalla stessa applicazione.
 
 ### Incluso
 
@@ -83,6 +83,8 @@ Registrazione: `email` valida (max 254), `password` di almeno 8 caratteri e non 
 | 403 | `FORBIDDEN`, `CSRF_INVALID` | Ruolo insufficiente o token CSRF assente/non valido |
 | 404 | `NOT_FOUND` | Risorsa non esistente o evento non pubblicato |
 | 409 | `EVENT_FULL`, `ALREADY_BOOKED`, `FEEDBACK_EXISTS`, `EMAIL_EXISTS`, `INVALID_EVENT_STATE`, `CAPACITY_BELOW_BOOKINGS`, `BOOKING_ALREADY_STARTED`, `EVENT_CANNOT_BE_CANCELLED` | Conflitto con stato o vincolo dati |
+| 405 | `METHOD_NOT_ALLOWED` | Metodo HTTP non previsto per la risorsa |
+| 406 | `NOT_ACCEPTABLE` | Nessuna rappresentazione disponibile per l'`Accept` richiesto |
 | 415 | `UNSUPPORTED_MEDIA_TYPE` | Body non JSON per gli endpoint JSON |
 
 ## 3. Modello dati e invarianti
@@ -258,7 +260,7 @@ I test d'integrazione database e T1 usano PostgreSQL embedded già verificato ne
 
 - Backend owner: `/api/**`, DTO, validation, error envelope, security, `db/migration/**`, repository e test.
 - Frontend owner: `src/main/resources/static/**`; usa solo questo contratto, non conosce schema DB e non implementa logica di autorizzazione client-side come misura di sicurezza.
-- Owner del contratto: orchestrator. Ogni modifica di endpoint/status/DTO richiede aggiornamento qui prima di adattare implementazioni.
+- Il contratto è la fonte unica di verità condivisa: ogni modifica di endpoint, status o DTO richiede l'aggiornamento di questo documento prima di adattare le implementazioni.
 
 ## 8. Non-obiettivi e limiti da documentare
 

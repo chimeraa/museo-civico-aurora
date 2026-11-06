@@ -51,6 +51,12 @@ I test di integrazione avviano un **PostgreSQL 17.2 embedded** tramite la librer
 
 ---
 
+## Architettura e diagrammi
+
+I diagrammi di progetto sono raccolti in [`docs/diagrams/`](docs/diagrams/): modello entità-relazione, architettura a strati, sequenza di prenotazione con controllo della capienza, flusso di login e protezione CSRF. Le sorgenti Mermaid sono in [`docs/diagrams/diagrammi.md`](docs/diagrams/diagrammi.md); le immagini PNG sono le stesse utilizzate nel documento di consegna.
+
+---
+
 ## Configurazione runtime
 
 Le credenziali del database provengono **solo da variabili d'ambiente**; i valori di fallback presenti in `application.properties` **non sono segreti**:
@@ -162,4 +168,4 @@ Lo schema è governato **esclusivamente da Flyway**, con le migrazioni in `src/m
 
 ## Riferimenti al Project Work
 
-Il repository è l'**artefatto complementare** del Project Work. Il **documento di consegna** è il **template universitario compilato** (`1777560537.docx`) con il **brief dell'assegnazione** (`1777277810.docx`) e la guida di lavoro `PROJECT_WORK_GUIDE.md`: questi materiali sono conservati **fuori dal repository di codice** e **non** sono inclusi in questa cartella.
+Il repository è l'**artefatto complementare** del Project Work. Il **documento di consegna** (template universitario compilato) e il **brief dell'assegnazione** sono materiali esterni al repository e **non** sono inclusi in questa cartella.
