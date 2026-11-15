@@ -74,6 +74,7 @@ class FeedbackIntegrationTest extends AbstractIntegrationTest {
 		AppUser visitor = createVisitor("concluded@example.com");
 		AppUser other = createVisitor("draft@example.com");
 		AppUser third = createVisitor("cancelled@example.com");
+		// Un evento passato è ancora giudicabile: è il caso da verificare.
 		CulturalEvent past = persistEvent("Concluso", EventStatus.PUBLISHED, 5, PAST_START, PAST_END);
 		CulturalEvent draft = persistEvent("Bozza", EventStatus.DRAFT, 5, FUTURE_START, FUTURE_END);
 		CulturalEvent cancelled = persistEvent("Annullato", EventStatus.CANCELLED, 5, FUTURE_START, FUTURE_END);

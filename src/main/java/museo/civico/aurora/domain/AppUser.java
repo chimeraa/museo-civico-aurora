@@ -26,6 +26,7 @@ public class AppUser {
 	@Column(name = "display_name", nullable = false, length = 100)
 	private String displayName;
 
+	// Mai la password vera, solo l'hash cifrato.
 	@Column(name = "password_hash", nullable = false, length = 255)
 	private String passwordHash;
 
@@ -40,7 +41,6 @@ public class AppUser {
 	protected AppUser() {
 	}
 
-	// Crea un nuovo utente.
 	public AppUser(String email, String displayName, String passwordHash, Role role, OffsetDateTime createdAt) {
 		this.email = email;
 		this.displayName = displayName;

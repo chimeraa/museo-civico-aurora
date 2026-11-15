@@ -102,6 +102,7 @@ class EventLifecycleIntegrationTest extends AbstractIntegrationTest {
 						.with(user(principalOf(admin))).with(csrfToken()))
 				.andExpect(status().isNoContent());
 
+		// Dopo l'annullamento dell'evento anche la prenotazione deve risultare annullata, con la data.
 		Booking reloaded = bookingRepository.findById(booking.getId()).orElseThrow();
 		assertThat(reloaded.getStatus()).isEqualTo(BookingStatus.CANCELLED);
 		assertThat(reloaded.getCancelledAt()).isNotNull();

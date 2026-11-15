@@ -71,6 +71,7 @@ class RequestValidationIntegrationTest extends AbstractIntegrationTest {
 		persistEvent("Boundary", EventStatus.PUBLISHED, 5, FUTURE_START, FUTURE_END);
 		persistEvent("Later", EventStatus.PUBLISHED, 5, FUTURE_START.plusDays(2), FUTURE_END.plusDays(2));
 
+		// Stesso istante come inizio e come fine: l'evento deve comparire comunque.
 		String boundary = FUTURE_START.toString();
 		mockMvc.perform(get("/api/events").param("from", boundary).param("to", boundary))
 				.andExpect(status().isOk())

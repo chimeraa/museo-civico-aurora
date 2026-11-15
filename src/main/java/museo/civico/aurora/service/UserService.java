@@ -37,9 +37,11 @@ public class UserService {
 	// Registra un visitatore. Controlla la password e che l'email non sia già usata.
 	@Transactional
 	public UserDto register(RegisterRequest request) {
+		// L'email si salva in minuscolo, così Mario@x.it e mario@x.it sono lo stesso account.
 		String email = request.email().trim().toLowerCase(Locale.ROOT);
 		String password = request.password();
 
+		// La password si controlla prima di cifrarla.
 		if (!PasswordPolicy.isValid(password)) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR,
 					"Alcuni campi non sono validi.",
@@ -52,6 +54,7 @@ public class UserService {
 					"Esiste gia' un account con questa email.");
 		}
 
+		// Chi si registra è sempre visitatore: il ruolo non arriva dal client.
 		AppUser user = new AppUser(email, request.displayName().trim(), passwordEncoder.encode(password), Role.VISITOR,
 				OffsetDateTime.now(clock));
 		try {

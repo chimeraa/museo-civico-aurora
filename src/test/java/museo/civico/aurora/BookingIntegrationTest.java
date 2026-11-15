@@ -54,6 +54,7 @@ class BookingIntegrationTest extends AbstractIntegrationTest {
 						.content("{\"eventId\":" + event.getId() + "}"))
 				.andExpect(status().isCreated())
 				.andReturn().getResponse().getContentAsString();
+		// Prendo l'id dalla risposta, per poter annullare la prenotazione.
 		long bookingId = JsonTestSupport.extractLong(created, "id");
 
 		// Il posto è occupato: un altro utente non può prenotare.

@@ -26,6 +26,7 @@ public class JsonLoginSuccessHandler implements AuthenticationSuccessHandler {
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication) throws IOException {
+		// Il frontend riceve solo i dati dell'utente, mai la password.
 		AppUserPrincipal principal = (AppUserPrincipal) authentication.getPrincipal();
 		UserDto body = new UserDto(principal.getId(), principal.getUsername(), principal.getDisplayName(),
 				principal.getRole());

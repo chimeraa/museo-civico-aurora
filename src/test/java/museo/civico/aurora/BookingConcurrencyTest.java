@@ -73,6 +73,7 @@ class BookingConcurrencyTest extends AbstractIntegrationTest {
 			executor.shutdownNow();
 		}
 
+		// Anche con richieste insieme, i posti confermati non superano la capienza.
 		long confirmed = bookingRepository.countByEventIdAndStatus(event.getId(), BookingStatus.CONFIRMED);
 		assertThat(confirmed).isEqualTo(capacity);
 		assertThat(outcomes.getOrDefault("OK", new AtomicInteger()).get()).isEqualTo(capacity);

@@ -54,6 +54,7 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
 				.filter(header -> header.startsWith("XSRF-TOKEN="))
 				.findFirst()
 				.orElseThrow(() -> new AssertionError("Cookie XSRF-TOKEN non materializzato: " + setCookies));
+		// In locale il cookie non deve avere l'attributo Secure.
 		assertThat(csrfHeader).doesNotContain("Secure");
 	}
 

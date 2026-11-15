@@ -34,10 +34,12 @@ public final class Paging {
 			throw new ApiException(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_PAGE_SIZE,
 					"Il parametro 'size' deve essere almeno 1.");
 		}
+		// Limite massimo: evita di caricare troppi dati in una volta.
 		if (size > MAX_SIZE) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_PAGE_SIZE,
 					"Il parametro 'size' non puo' superare " + MAX_SIZE + ".");
 		}
+		// Pagina e ordinamento pronti per il database.
 		return PageRequest.of(page, size, sort);
 	}
 
@@ -47,6 +49,7 @@ public final class Paging {
 			return null;
 		}
 		try {
+			// Accetta solo date con il fuso orario, per esempio 2026-06-01T10:00:00Z.
 			return OffsetDateTime.parse(value, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 		}
 		catch (DateTimeParseException ex) {

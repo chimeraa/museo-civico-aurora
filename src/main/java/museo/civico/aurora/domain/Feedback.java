@@ -29,9 +29,11 @@ public class Feedback {
 	@JoinColumn(name = "user_id", nullable = false)
 	private AppUser user;
 
+	// Voto da 1 a 5: il controllo è fatto nella richiesta.
 	@Column(name = "rating", nullable = false)
 	private Integer rating;
 
+	// Commento facoltativo.
 	@Column(name = "comment", length = 2000)
 	private String comment;
 
@@ -42,7 +44,6 @@ public class Feedback {
 	protected Feedback() {
 	}
 
-	// Crea un nuovo giudizio.
 	public Feedback(CulturalEvent event, AppUser user, Integer rating, String comment, OffsetDateTime createdAt) {
 		this.event = event;
 		this.user = user;

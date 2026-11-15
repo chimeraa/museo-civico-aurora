@@ -72,6 +72,7 @@ public class BookingService {
 
 		AppUser user = users.findById(principal.getId()).orElseThrow(BookingService::notFound);
 
+		// La prenotazione nasce confermata: il posto viene occupato subito.
 		Booking booking = new Booking(event, user, BookingStatus.CONFIRMED, now);
 		try {
 			// Salva subito: se il posto è già preso per lo stesso utente, il database blocca qui.
@@ -101,12 +102,14 @@ public class BookingService {
 		if (!booking.getUser().getId().equals(principal.getId())) {
 			throw notFound();
 		}
+		// Il visitatore annulla solo le sue prenotazioni. Il controllo sulla data è dentro cancel.
 		cancel(booking);
 	}
 
 	// Prenotazioni di un evento, per l'admin.
 	@Transactional(readOnly = true)
 	public PageDto<AdminBookingDto> listForEvent(Long eventId, int page, int size) {
+		// Se l'evento non esiste, niente elenco: 404.
 		if (!events.existsById(eventId)) {
 			throw notFound();
 		}
@@ -133,6 +136,7 @@ public class BookingService {
 			throw new ApiException(HttpStatus.CONFLICT, ErrorCode.BOOKING_ALREADY_STARTED,
 					"L'evento e' gia' iniziato: la prenotazione non puo' piu' essere annullata.");
 		}
+		// Non cancelliamo la riga: la segniamo come annullata, così resta lo storico.
 		booking.setStatus(BookingStatus.CANCELLED);
 		booking.setCancelledAt(now);
 		bookings.save(booking);

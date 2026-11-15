@@ -29,6 +29,7 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
 	@Override
 	public void handle(HttpServletRequest request, HttpServletResponse response,
 			AccessDeniedException accessDeniedException) throws IOException {
+		// Stesso 403, due motivi: token CSRF mancante, oppure ruolo non adatto.
 		String code = (accessDeniedException instanceof CsrfException) ? ErrorCode.CSRF_INVALID
 				: ErrorCode.FORBIDDEN;
 		String message = (accessDeniedException instanceof CsrfException)

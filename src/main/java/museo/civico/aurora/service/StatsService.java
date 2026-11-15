@@ -38,9 +38,12 @@ public class StatsService {
 		OffsetDateTime now = OffsetDateTime.now(clock);
 
 		long publishedEventCount = events.countByStatus(EventStatus.PUBLISHED);
+		// Solo eventi pubblicati che non sono ancora iniziati.
 		long upcomingEventCount = events.countByStatusAndStartsAtGreaterThanEqual(EventStatus.PUBLISHED, now);
+		// Le prenotazioni annullate non contano.
 		long confirmedBookingCount = bookings.countConfirmedForUpcomingPublished(BookingStatus.CONFIRMED,
 				EventStatus.PUBLISHED, now);
+		// Posti totali degli eventi futuri: è il denominatore della percentuale.
 		long totalCapacity = events.sumCapacityByStatusAndStartsAtGreaterThanEqual(EventStatus.PUBLISHED, now);
 
 		// Percentuale di posti occupati. Se non ci sono posti, è 0.

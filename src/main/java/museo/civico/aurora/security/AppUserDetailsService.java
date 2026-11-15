@@ -25,6 +25,7 @@ public class AppUserDetailsService implements UserDetailsService {
 		if (username == null) {
 			throw new UsernameNotFoundException("Credenziali non valide.");
 		}
+		// Stessa pulizia dell'email fatta in registrazione, altrimenti il login non trova l'utente.
 		String email = username.trim().toLowerCase(Locale.ROOT);
 		return users.findByEmailIgnoreCase(email)
 				.map(AppUserPrincipal::from)

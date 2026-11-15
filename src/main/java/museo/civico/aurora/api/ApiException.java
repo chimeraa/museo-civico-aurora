@@ -21,6 +21,7 @@ public class ApiException extends RuntimeException {
 		super(message);
 		this.status = status;
 		this.code = code;
+		// Lista che non si può cambiare, così nessuno la modifica dopo.
 		this.fieldErrors = fieldErrors == null ? List.of() : List.copyOf(fieldErrors);
 	}
 

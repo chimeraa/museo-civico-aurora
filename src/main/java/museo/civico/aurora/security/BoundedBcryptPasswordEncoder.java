@@ -21,6 +21,7 @@ public class BoundedBcryptPasswordEncoder implements PasswordEncoder {
 		if (rawPassword == null || PasswordPolicy.exceedsBcryptLimit(rawPassword.toString())) {
 			return false;
 		}
+		// Solo se la password rientra nel limite si fa il confronto vero.
 		return delegate.matches(rawPassword, encodedPassword);
 	}
 

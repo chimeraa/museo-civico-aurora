@@ -12,6 +12,7 @@ public final class PasswordPolicy {
 	}
 
 	public static boolean isTooShort(String password) {
+		// Conta i caratteri, non i byte.
 		return password == null || password.length() < MIN_LENGTH;
 	}
 

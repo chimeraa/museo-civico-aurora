@@ -51,6 +51,7 @@ public class EventService {
 		Paging.validateRange(fromTs, toTs);
 
 		Page<CulturalEvent> result;
+		// Senza date mostra tutti i pubblicati. Con le date filtra per orario di inizio.
 		if (fromTs == null && toTs == null) {
 			result = events.findByStatus(EventStatus.PUBLISHED, pageable);
 		}
@@ -71,6 +72,7 @@ public class EventService {
 	// Dettaglio di un evento pubblicato. Se è bozza o annullato, risponde 404.
 	@Transactional(readOnly = true)
 	public EventDetailDto getPublicDetail(Long id) {
+		// Bozze e annullati sono invisibili al pubblico: per lui è come se non esistessero.
 		CulturalEvent event = events.findById(id)
 				.filter(e -> e.getStatus() == EventStatus.PUBLISHED)
 				.orElseThrow(() -> notFound());
@@ -95,6 +97,7 @@ public class EventService {
 	// Crea un evento. Se lo stato non è scritto, l'evento è bozza.
 	@Transactional
 	public EventDetailDto create(EventCreateRequest request) {
+		// Un evento nuovo nasce bozza, a meno che l'admin non scelga lo stato.
 		EventStatus status = request.status() == null ? EventStatus.DRAFT : request.status();
 		validateEditable(status, request.startsAt(), request.endsAt());
 		OffsetDateTime now = OffsetDateTime.now(clock);
@@ -115,6 +118,7 @@ public class EventService {
 
 		// Controlli sui dati nuovi.
 		validateEditable(request.status(), request.startsAt(), request.endsAt());
+		// Dopo la pubblicazione non si torna in bozza, altrimenti le prenotazioni resterebbero su un evento nascosto.
 		if (event.getStatus() == EventStatus.PUBLISHED && request.status() == EventStatus.DRAFT) {
 			throw new ApiException(HttpStatus.CONFLICT, ErrorCode.INVALID_EVENT_STATE,
 					"Un evento pubblicato non puo' tornare in bozza.");
@@ -127,6 +131,7 @@ public class EventService {
 					"La capienza non puo' essere inferiore alle prenotazioni confermate.");
 		}
 
+		// Solo ora scriviamo i dati nuovi: tutti i controlli sono già passati.
 		event.setTitle(request.title().trim());
 		event.setDescription(trimToNull(request.description()));
 		event.setLocation(request.location().trim());
@@ -153,11 +158,13 @@ public class EventService {
 		event.setStatus(EventStatus.CANCELLED);
 		event.setUpdatedAt(now);
 		events.save(event);
+		// Le prenotazioni confermate diventano annullate insieme all'evento.
 		bookings.cancelConfirmedByEventId(id, BookingStatus.CONFIRMED, BookingStatus.CANCELLED, now);
 	}
 
 	// Controlla date e stato prima di salvare.
 	private void validateEditable(EventStatus status, OffsetDateTime startsAt, OffsetDateTime endsAt) {
+		// Un evento che finisce prima di iniziare non ha senso.
 		if (startsAt.isAfter(endsAt)) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR,
 					"Alcuni campi non sono validi.",
@@ -189,6 +196,7 @@ public class EventService {
 	// Posti liberi: capienza meno le prenotazioni confermate.
 	private int seatsAvailable(CulturalEvent event) {
 		long confirmed = bookings.countByEventIdAndStatus(event.getId(), BookingStatus.CONFIRMED);
+		// Non scendiamo mai sotto zero.
 		return (int) Math.max(0, event.getCapacity() - confirmed);
 	}
 

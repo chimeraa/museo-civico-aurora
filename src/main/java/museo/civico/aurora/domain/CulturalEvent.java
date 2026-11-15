@@ -35,6 +35,7 @@ public class CulturalEvent {
 	@Column(name = "ends_at", nullable = false)
 	private OffsetDateTime endsAt;
 
+	// Posti totali. I posti liberi si calcolano togliendo le prenotazioni confermate.
 	@Column(name = "capacity", nullable = false)
 	private Integer capacity;
 
@@ -52,7 +53,6 @@ public class CulturalEvent {
 	protected CulturalEvent() {
 	}
 
-	// Crea un nuovo evento.
 	public CulturalEvent(String title, String description, String location, OffsetDateTime startsAt,
 			OffsetDateTime endsAt, Integer capacity, EventStatus status, OffsetDateTime createdAt,
 			OffsetDateTime updatedAt) {

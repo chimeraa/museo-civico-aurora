@@ -48,11 +48,13 @@ public class AdminSeedRunner implements ApplicationRunner {
 		if (!StringUtils.hasText(adminEmail) || !StringUtils.hasText(adminPassword)) {
 			return;
 		}
+		// Una password debole non crea l'admin, ma l'app parte lo stesso.
 		if (!PasswordPolicy.isValid(adminPassword)) {
 			log.warn("APP_ADMIN_PASSWORD non rispetta i requisiti; nessun admin creato.");
 			return;
 		}
 		String email = adminEmail.trim().toLowerCase(Locale.ROOT);
+		// Se l'admin esiste già, non ne creiamo un altro.
 		if (users.existsByEmailIgnoreCase(email)) {
 			return;
 		}

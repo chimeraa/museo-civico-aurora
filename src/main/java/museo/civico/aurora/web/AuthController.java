@@ -35,6 +35,7 @@ public class AuthController {
 	// Dà al frontend il token CSRF, da mandare nelle richieste che cambiano dati.
 	@GetMapping("/csrf")
 	public CsrfTokenDto csrf(CsrfToken csrfToken, HttpServletRequest request) {
+		// Il token viene creato solo adesso, quando serve davvero.
 		DeferredCsrfToken deferred = (DeferredCsrfToken) request.getAttribute(DeferredCsrfToken.class.getName());
 		String token = deferred != null ? deferred.get().getToken() : csrfToken.getToken();
 		return new CsrfTokenDto(token, csrfToken.getHeaderName(), csrfToken.getParameterName(), CSRF_COOKIE_NAME);

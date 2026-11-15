@@ -54,7 +54,9 @@ public class FeedbackService {
 			throw notFound();
 		}
 
+		// Il giudizio è possibile anche su eventi già conclusi, purché siano stati pubblicati.
 		AppUser user = users.findById(principal.getId()).orElseThrow(FeedbackService::notFound);
+		// Il commento vuoto viene salvato come null, così non compare nulla.
 		Feedback feedback = new Feedback(event, user, request.rating(), trimToNull(request.comment()),
 				OffsetDateTime.now(clock));
 		try {

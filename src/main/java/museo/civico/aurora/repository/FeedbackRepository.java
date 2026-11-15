@@ -10,7 +10,6 @@ import museo.civico.aurora.domain.Feedback;
 // Accesso al database per i giudizi.
 public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
 
-	// Giudizi di un evento, a pagine.
 	Page<Feedback> findByEventId(Long eventId, Pageable pageable);
 
 	// Voto medio di tutti i giudizi. Vale null se non ce ne sono.

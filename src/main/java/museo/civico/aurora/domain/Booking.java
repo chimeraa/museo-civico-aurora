@@ -38,6 +38,7 @@ public class Booking {
 	@Column(name = "created_at", nullable = false)
 	private OffsetDateTime createdAt;
 
+	// Resta vuoto finché la prenotazione non viene annullata.
 	@Column(name = "cancelled_at")
 	private OffsetDateTime cancelledAt;
 
@@ -45,7 +46,6 @@ public class Booking {
 	protected Booking() {
 	}
 
-	// Crea una nuova prenotazione.
 	public Booking(CulturalEvent event, AppUser user, BookingStatus status, OffsetDateTime createdAt) {
 		this.event = event;
 		this.user = user;

@@ -57,10 +57,12 @@ public class SecurityConfig {
 				.securityMatcher("/api/**")
 				.authorizeHttpRequests(auth -> auth
 						.dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
+						// Il catalogo eventi è pubblico: lo vedono anche gli ospiti senza login.
 						.requestMatchers(HttpMethod.GET, "/api/events/**").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/auth/csrf").permitAll()
+						// Solo l'admin entra nelle pagine /api/admin.
 						.requestMatchers("/api/admin/**").hasRole("ADMIN")
 						.anyRequest().authenticated())
 				.csrf(csrf -> csrf.spa().csrfTokenRepository(csrfTokenRepository))
@@ -69,6 +71,7 @@ public class SecurityConfig {
 						.loginProcessingUrl("/api/auth/login")
 						.successHandler(loginSuccessHandler)
 						.failureHandler(loginFailureHandler))
+				// Il logout cancella la sessione e il cookie JSESSIONID.
 				.logout(logout -> logout
 						.logoutUrl("/api/auth/logout")
 						.logoutSuccessHandler(
@@ -94,6 +97,7 @@ public class SecurityConfig {
 								"/error")
 						.permitAll()
 						.anyRequest().permitAll())
+				// Le pagine statiche non cambiano dati, quindi non serve il token CSRF.
 				.csrf(csrf -> csrf.disable());
 		return http.build();
 	}

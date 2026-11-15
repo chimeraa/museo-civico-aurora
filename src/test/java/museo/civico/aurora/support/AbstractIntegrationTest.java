@@ -123,6 +123,7 @@ public abstract class AbstractIntegrationTest {
 		if (cookie == null) {
 			throw new IllegalStateException("Cookie CSRF XSRF-TOKEN non materializzato");
 		}
+		// Il token sta nel cookie e va rimandato anche nell'header, come fa il frontend.
 		String token = cookie.getValue();
 		return request -> {
 			request.setCookies(cookie);
