@@ -74,7 +74,7 @@ public class EventService {
 		// Bozze e annullati sono invisibili al pubblico: per lui è come se non esistessero.
 		CulturalEvent event = events.findById(id)
 				.filter(e -> e.getStatus() == EventStatus.PUBLISHED)
-				.orElseThrow(() -> notFound());
+				.orElseThrow(ApiException::notFound);
 		return toDetail(event);
 	}
 
@@ -88,7 +88,7 @@ public class EventService {
 
 	@Transactional(readOnly = true)
 	public EventDetailDto getAdminDetail(Long id) {
-		return toDetail(events.findById(id).orElseThrow(EventService::notFound));
+		return toDetail(events.findById(id).orElseThrow(ApiException::notFound));
 	}
 
 	// Crea un evento. Se lo stato non è scritto, l'evento è bozza.
@@ -105,7 +105,7 @@ public class EventService {
 	// Modifica un evento, con i controlli su stato, date e posti.
 	@Transactional
 	public EventDetailDto update(Long id, EventUpdateRequest request) {
-		CulturalEvent event = events.findByIdForUpdate(id).orElseThrow(EventService::notFound);
+		CulturalEvent event = events.findByIdForUpdate(id).orElseThrow(ApiException::notFound);
 
 		if (event.getStatus() == EventStatus.CANCELLED) {
 			throw new ApiException(HttpStatus.CONFLICT, ErrorCode.INVALID_EVENT_STATE,
@@ -142,7 +142,7 @@ public class EventService {
 	// Se è iniziato e non è annullato, dà 409.
 	@Transactional
 	public void cancel(Long id) {
-		CulturalEvent event = events.findByIdForUpdate(id).orElseThrow(EventService::notFound);
+		CulturalEvent event = events.findByIdForUpdate(id).orElseThrow(ApiException::notFound);
 		if (event.getStatus() == EventStatus.CANCELLED) {
 			return;
 		}
@@ -200,9 +200,5 @@ public class EventService {
 		}
 		String trimmed = value.trim();
 		return trimmed.isEmpty() ? null : trimmed;
-	}
-
-	private static ApiException notFound() {
-		return new ApiException(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, "Risorsa non trovata.");
 	}
 }

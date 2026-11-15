@@ -36,4 +36,8 @@ public class ApiException extends RuntimeException {
 	public List<FieldError> getFieldErrors() {
 		return fieldErrors;
 	}
+
+	public static ApiException notFound() {
+		return new ApiException(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, "Risorsa non trovata.");
+	}
 }

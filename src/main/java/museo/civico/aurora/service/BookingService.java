@@ -52,11 +52,10 @@ public class BookingService {
 	// insieme, l'indice unico dà 409 e non 500.
 	@Transactional
 	public BookingDto create(AppUserPrincipal principal, BookingCreateRequest request) {
-		CulturalEvent event = events.findByIdForUpdate(request.eventId()).orElse(null);
 		// L'evento non c'è o non è pubblicato: 404.
-		if (event == null || event.getStatus() != EventStatus.PUBLISHED) {
-			throw notFound();
-		}
+		CulturalEvent event = events.findByIdForUpdate(request.eventId())
+				.filter(e -> e.getStatus() == EventStatus.PUBLISHED)
+				.orElseThrow(ApiException::notFound);
 
 		OffsetDateTime now = OffsetDateTime.now(clock);
 		if (!now.isBefore(event.getStartsAt())) {
@@ -70,7 +69,7 @@ public class BookingService {
 					"Non ci sono posti disponibili per questo evento.");
 		}
 
-		AppUser user = users.findById(principal.getId()).orElseThrow(BookingService::notFound);
+		AppUser user = users.findById(principal.getId()).orElseThrow(ApiException::notFound);
 
 		Booking booking = new Booking(event, user, BookingStatus.CONFIRMED, now);
 		try {
@@ -94,10 +93,10 @@ public class BookingService {
 
 	@Transactional
 	public void cancelMine(AppUserPrincipal principal, Long bookingId) {
-		Booking booking = bookings.findById(bookingId).orElseThrow(BookingService::notFound);
+		Booking booking = bookings.findById(bookingId).orElseThrow(ApiException::notFound);
 		// La prenotazione è di un altro utente: 404, come se non esistesse.
 		if (!booking.getUser().getId().equals(principal.getId())) {
-			throw notFound();
+			throw ApiException.notFound();
 		}
 		cancel(booking);
 	}
@@ -106,7 +105,7 @@ public class BookingService {
 	public PageDto<AdminBookingDto> listForEvent(Long eventId, int page, int size) {
 		// Se l'evento non esiste, niente elenco: 404.
 		if (!events.existsById(eventId)) {
-			throw notFound();
+			throw ApiException.notFound();
 		}
 		Pageable pageable = Paging.validate(page, size, CREATED_AT_DESC);
 		Page<Booking> result = bookings.findByEventId(eventId, pageable);
@@ -116,7 +115,7 @@ public class BookingService {
 
 	@Transactional
 	public void cancelByAdmin(Long bookingId) {
-		cancel(bookings.findById(bookingId).orElseThrow(BookingService::notFound));
+		cancel(bookings.findById(bookingId).orElseThrow(ApiException::notFound));
 	}
 
 	// Annulla la prenotazione, se non è già annullata e l'evento non è ancora iniziato.
@@ -147,9 +146,5 @@ public class BookingService {
 		return new AdminBookingDto(booking.getId(), event.getId(), event.getTitle(), event.getStartsAt(),
 				booking.getStatus(), booking.getCreatedAt(), booking.getCancelledAt(),
 				booking.getUser().getDisplayName());
-	}
-
-	private static ApiException notFound() {
-		return new ApiException(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, "Risorsa non trovata.");
 	}
 }

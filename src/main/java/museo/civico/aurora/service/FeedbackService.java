@@ -48,13 +48,12 @@ public class FeedbackService {
 	// Salva un giudizio: solo su eventi pubblicati e una volta sola per utente.
 	@Transactional
 	public FeedbackDto create(AppUserPrincipal principal, Long eventId, FeedbackCreateRequest request) {
-		CulturalEvent event = events.findById(eventId).orElseThrow(FeedbackService::notFound);
 		// Bozze e annullati non si possono giudicare, mentre un evento già concluso sì.
-		if (event.getStatus() != EventStatus.PUBLISHED) {
-			throw notFound();
-		}
+		CulturalEvent event = events.findById(eventId)
+				.filter(e -> e.getStatus() == EventStatus.PUBLISHED)
+				.orElseThrow(ApiException::notFound);
 
-		AppUser user = users.findById(principal.getId()).orElseThrow(FeedbackService::notFound);
+		AppUser user = users.findById(principal.getId()).orElseThrow(ApiException::notFound);
 		// Un commento vuoto diventa null.
 		Feedback feedback = new Feedback(event, user, request.rating(), trimToNull(request.comment()),
 				OffsetDateTime.now(clock));
@@ -72,7 +71,7 @@ public class FeedbackService {
 	@Transactional(readOnly = true)
 	public PageDto<FeedbackDto> listForEvent(Long eventId, int page, int size) {
 		if (!events.existsById(eventId)) {
-			throw notFound();
+			throw ApiException.notFound();
 		}
 		Pageable pageable = Paging.validate(page, size, CREATED_AT_DESC);
 		Page<Feedback> result = feedbacks.findByEventId(eventId, pageable);
@@ -93,9 +92,5 @@ public class FeedbackService {
 		}
 		String trimmed = value.trim();
 		return trimmed.isEmpty() ? null : trimmed;
-	}
-
-	private static ApiException notFound() {
-		return new ApiException(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, "Risorsa non trovata.");
 	}
 }

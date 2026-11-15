@@ -18,8 +18,6 @@ import museo.civico.aurora.api.FieldError;
 // 50 e le date sono ISO con offset, con from mai dopo to.
 public final class Paging {
 
-	public static final int DEFAULT_PAGE = 0;
-	public static final int DEFAULT_SIZE = 20;
 	public static final int MAX_SIZE = 50;
 
 	private Paging() {
