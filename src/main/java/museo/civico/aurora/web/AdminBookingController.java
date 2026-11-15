@@ -20,7 +20,6 @@ public class AdminBookingController {
 		this.bookingService = bookingService;
 	}
 
-	// Annulla una prenotazione.
 	@PostMapping("/{id}/cancel")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void cancel(@PathVariable Long id) {

@@ -32,7 +32,7 @@ public class AuthController {
 		this.userService = userService;
 	}
 
-	// Dà al frontend il token CSRF, da mandare nelle richieste che cambiano dati.
+	// Il frontend riceve il token CSRF e lo rimanda nelle richieste che cambiano dati.
 	@GetMapping("/csrf")
 	public CsrfTokenDto csrf(CsrfToken csrfToken, HttpServletRequest request) {
 		// Il token viene creato solo adesso, quando serve davvero.
@@ -41,14 +41,12 @@ public class AuthController {
 		return new CsrfTokenDto(token, csrfToken.getHeaderName(), csrfToken.getParameterName(), CSRF_COOKIE_NAME);
 	}
 
-	// Registra un nuovo visitatore.
 	@PostMapping("/register")
 	@ResponseStatus(HttpStatus.CREATED)
 	public UserDto register(@Valid @RequestBody RegisterRequest request) {
 		return userService.register(request);
 	}
 
-	// Dati dell'utente loggato.
 	@GetMapping("/me")
 	public UserDto me(@AuthenticationPrincipal AppUserPrincipal principal) {
 		return new UserDto(principal.getId(), principal.getUsername(), principal.getDisplayName(), principal.getRole());

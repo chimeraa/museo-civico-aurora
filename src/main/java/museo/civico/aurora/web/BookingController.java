@@ -30,7 +30,6 @@ public class BookingController {
 		this.bookingService = bookingService;
 	}
 
-	// Prenota un posto per un evento.
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public BookingDto create(@AuthenticationPrincipal AppUserPrincipal principal,
@@ -38,7 +37,6 @@ public class BookingController {
 		return bookingService.create(principal, request);
 	}
 
-	// Le mie prenotazioni.
 	@GetMapping("/me")
 	public PageDto<BookingDto> mine(@AuthenticationPrincipal AppUserPrincipal principal,
 			@RequestParam(defaultValue = "0") int page,
@@ -46,7 +44,6 @@ public class BookingController {
 		return bookingService.listMine(principal, page, size);
 	}
 
-	// Annulla una mia prenotazione.
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void cancel(@AuthenticationPrincipal AppUserPrincipal principal, @PathVariable Long id) {

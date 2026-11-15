@@ -32,7 +32,6 @@ public class StatsService {
 		this.clock = clock;
 	}
 
-	// Calcola tutti i numeri delle statistiche.
 	@Transactional(readOnly = true)
 	public AdminStatsDto getStats() {
 		OffsetDateTime now = OffsetDateTime.now(clock);

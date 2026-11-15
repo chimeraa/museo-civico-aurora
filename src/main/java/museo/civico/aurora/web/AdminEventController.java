@@ -39,47 +39,41 @@ public class AdminEventController {
 		this.feedbackService = feedbackService;
 	}
 
-	// Elenco di tutti gli eventi, anche bozze e annullati.
 	@GetMapping("/events")
 	public PageDto<AdminEventSummaryDto> list(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "20") int size) {
 		return eventService.listAdmin(page, size);
 	}
 
-	// Dettaglio di un evento.
 	@GetMapping("/events/{id}")
 	public EventDetailDto detail(@PathVariable Long id) {
 		return eventService.getAdminDetail(id);
 	}
 
-	// Crea un evento.
 	@PostMapping("/events")
 	@ResponseStatus(HttpStatus.CREATED)
 	public EventDetailDto create(@Valid @RequestBody EventCreateRequest request) {
 		return eventService.create(request);
 	}
 
-	// Modifica un evento.
 	@PutMapping("/events/{id}")
 	public EventDetailDto update(@PathVariable Long id, @Valid @RequestBody EventUpdateRequest request) {
 		return eventService.update(id, request);
 	}
 
-	// Annulla un evento e le sue prenotazioni.
+	// Annulla anche le prenotazioni collegate.
 	@PostMapping("/events/{id}/cancel")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void cancel(@PathVariable Long id) {
 		eventService.cancel(id);
 	}
 
-	// Prenotazioni di un evento.
 	@GetMapping("/events/{id}/bookings")
 	public PageDto<AdminBookingDto> bookings(@PathVariable Long id, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "20") int size) {
 		return bookingService.listForEvent(id, page, size);
 	}
 
-	// Giudizi di un evento.
 	@GetMapping("/events/{id}/feedback")
 	public PageDto<FeedbackDto> feedback(@PathVariable Long id, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "20") int size) {

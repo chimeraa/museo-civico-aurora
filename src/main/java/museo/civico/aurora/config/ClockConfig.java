@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ClockConfig {
 
-	// Restituisce l'orologio di sistema in UTC.
+	// Orologio di sistema, in UTC.
 	@Bean
 	public Clock clock() {
 		return Clock.systemUTC();

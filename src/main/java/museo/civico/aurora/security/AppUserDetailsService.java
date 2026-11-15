@@ -9,7 +9,8 @@ import org.springframework.stereotype.Service;
 
 import museo.civico.aurora.repository.AppUserRepository;
 
-// Cerca l'utente quando fa login, usando la sua email.
+// Cerca l'utente al login partendo dall'email, che mette in minuscolo come fa la
+// registrazione.
 @Service
 public class AppUserDetailsService implements UserDetailsService {
 
@@ -19,7 +20,6 @@ public class AppUserDetailsService implements UserDetailsService {
 		this.users = users;
 	}
 
-	// Se l'email non esiste, il login fallisce.
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		if (username == null) {

@@ -45,18 +45,17 @@ public class FeedbackService {
 		this.clock = clock;
 	}
 
-	// Salva il giudizio. Solo per eventi pubblicati e una sola volta per utente.
+	// Salva un giudizio: solo su eventi pubblicati e una volta sola per utente.
 	@Transactional
 	public FeedbackDto create(AppUserPrincipal principal, Long eventId, FeedbackCreateRequest request) {
 		CulturalEvent event = events.findById(eventId).orElseThrow(FeedbackService::notFound);
-		// Bozze e annullati non si possono giudicare.
+		// Bozze e annullati non si possono giudicare, mentre un evento già concluso sì.
 		if (event.getStatus() != EventStatus.PUBLISHED) {
 			throw notFound();
 		}
 
-		// Il giudizio è possibile anche su eventi già conclusi, purché siano stati pubblicati.
 		AppUser user = users.findById(principal.getId()).orElseThrow(FeedbackService::notFound);
-		// Il commento vuoto viene salvato come null, così non compare nulla.
+		// Un commento vuoto diventa null.
 		Feedback feedback = new Feedback(event, user, request.rating(), trimToNull(request.comment()),
 				OffsetDateTime.now(clock));
 		try {
@@ -70,7 +69,6 @@ public class FeedbackService {
 		return toDto(feedback);
 	}
 
-	// Giudizi di un evento per l'admin, a pagine.
 	@Transactional(readOnly = true)
 	public PageDto<FeedbackDto> listForEvent(Long eventId, int page, int size) {
 		if (!events.existsById(eventId)) {
@@ -97,7 +95,6 @@ public class FeedbackService {
 		return trimmed.isEmpty() ? null : trimmed;
 	}
 
-	// Errore 404 generico.
 	private static ApiException notFound() {
 		return new ApiException(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, "Risorsa non trovata.");
 	}

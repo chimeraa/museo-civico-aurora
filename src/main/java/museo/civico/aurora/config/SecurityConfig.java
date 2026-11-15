@@ -32,7 +32,7 @@ public class SecurityConfig {
 		return new BoundedBcryptPasswordEncoder();
 	}
 
-	// Dove salvare il token CSRF: nel cookie, così il frontend può leggerlo.
+	// Il token CSRF va in un cookie che il frontend può leggere.
 	@Bean
 	public CsrfTokenRepository csrfTokenRepository(
 			@Value("${app.csrf.cookie.secure:false}") boolean csrfCookieSecure) {
@@ -86,7 +86,7 @@ public class SecurityConfig {
 		return http.build();
 	}
 
-	// Regole per le pagine del sito (html, css, js): sono tutte pubbliche.
+	// Pagine del sito (html, css, js): accessibili a tutti.
 	@Bean
 	@Order(2)
 	public SecurityFilterChain frontendSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -97,7 +97,7 @@ public class SecurityConfig {
 								"/error")
 						.permitAll()
 						.anyRequest().permitAll())
-				// Le pagine statiche non cambiano dati, quindi non serve il token CSRF.
+				// Le pagine statiche non cambiano dati, quindi il CSRF non serve.
 				.csrf(csrf -> csrf.disable());
 		return http.build();
 	}

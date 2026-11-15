@@ -26,7 +26,7 @@ public interface CulturalEventRepository extends JpaRepository<CulturalEvent, Lo
 	Page<CulturalEvent> findByStatusAndStartsAtBetween(EventStatus status, OffsetDateTime from, OffsetDateTime to,
 			Pageable pageable);
 
-	// Trova l'evento e lo blocca, così due persone non lo cambiano insieme.
+	// Blocca la riga dell'evento: due richieste insieme non lo cambiano nello stesso momento.
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("select e from CulturalEvent e where e.id = :id")
 	Optional<CulturalEvent> findByIdForUpdate(@Param("id") Long id);

@@ -114,7 +114,7 @@ class EventLifecycleIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(status().isNoContent());
 	}
 
-	// Un evento già iniziato non si può annullare.
+	// Un evento già iniziato non si annulla.
 	@Test
 	void cancelStartedEventIsRejected() throws Exception {
 		AppUser admin = createAdmin("admin@example.com");
@@ -126,7 +126,7 @@ class EventLifecycleIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("EVENT_CANNOT_BE_CANCELLED"));
 	}
 
-	// Un evento annullato non si può modificare.
+	// Un evento annullato resta com'è.
 	@Test
 	void updateCancelledEventIsRejected() throws Exception {
 		AppUser admin = createAdmin("admin@example.com");

@@ -14,7 +14,8 @@ import museo.civico.aurora.api.ApiException;
 import museo.civico.aurora.api.ErrorCode;
 import museo.civico.aurora.api.FieldError;
 
-// Controlla pagina, dimensione e date che arrivano dalla richiesta.
+// Legge pagina, size e date della richiesta. La pagina parte da 0, size va da 1 a
+// 50 e le date sono ISO con offset, con from mai dopo to.
 public final class Paging {
 
 	public static final int DEFAULT_PAGE = 0;
@@ -24,7 +25,6 @@ public final class Paging {
 	private Paging() {
 	}
 
-	// Controlla pagina e dimensione. La dimensione va da 1 a 50.
 	public static Pageable validate(int page, int size, Sort sort) {
 		if (page < 0) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_PAGE,
@@ -39,11 +39,9 @@ public final class Paging {
 			throw new ApiException(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_PAGE_SIZE,
 					"Il parametro 'size' non puo' superare " + MAX_SIZE + ".");
 		}
-		// Pagina e ordinamento pronti per il database.
 		return PageRequest.of(page, size, sort);
 	}
 
-	// Legge una data. Se è vuota restituisce null, se è sbagliata dà errore 400.
 	public static OffsetDateTime parseOptional(String value, String field) {
 		if (value == null || value.isBlank()) {
 			return null;
@@ -59,7 +57,6 @@ public final class Paging {
 		}
 	}
 
-	// La data di inizio non può essere dopo quella di fine.
 	public static void validateRange(OffsetDateTime from, OffsetDateTime to) {
 		if (from != null && to != null && from.isAfter(to)) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_TIME_RANGE,

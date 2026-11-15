@@ -27,7 +27,6 @@ public class AppUserPrincipal implements UserDetails {
 		this.role = role;
 	}
 
-	// Crea i dati di sessione partendo dall'utente del database.
 	public static AppUserPrincipal from(AppUser user) {
 		return new AppUserPrincipal(user.getId(), user.getEmail(), user.getDisplayName(), user.getPasswordHash(),
 				user.getRole());
@@ -45,7 +44,6 @@ public class AppUserPrincipal implements UserDetails {
 		return role;
 	}
 
-	// Il ruolo dell'utente, con il prefisso ROLE_ che vuole Spring.
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));

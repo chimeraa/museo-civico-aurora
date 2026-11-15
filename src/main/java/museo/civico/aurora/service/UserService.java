@@ -34,10 +34,9 @@ public class UserService {
 		this.clock = clock;
 	}
 
-	// Registra un visitatore. Controlla la password e che l'email non sia già usata.
 	@Transactional
 	public UserDto register(RegisterRequest request) {
-		// L'email si salva in minuscolo, così Mario@x.it e mario@x.it sono lo stesso account.
+		// L'email viene salvata in minuscolo: Mario@x.it e mario@x.it sono lo stesso account.
 		String email = request.email().trim().toLowerCase(Locale.ROOT);
 		String password = request.password();
 
@@ -58,7 +57,8 @@ public class UserService {
 		AppUser user = new AppUser(email, request.displayName().trim(), passwordEncoder.encode(password), Role.VISITOR,
 				OffsetDateTime.now(clock));
 		try {
-			// Se due persone usano la stessa email insieme, il database blocca qui.
+			// Se due persone usano insieme la stessa email, l'indice unico porta a
+			// 409 e non a 500.
 			user = users.saveAndFlush(user);
 		}
 		catch (DataIntegrityViolationException ex) {
@@ -68,7 +68,6 @@ public class UserService {
 		return toDto(user);
 	}
 
-	// Converte l'utente nel formato da mostrare, senza password.
 	public static UserDto toDto(AppUser user) {
 		return new UserDto(user.getId(), user.getEmail(), user.getDisplayName(), user.getRole());
 	}

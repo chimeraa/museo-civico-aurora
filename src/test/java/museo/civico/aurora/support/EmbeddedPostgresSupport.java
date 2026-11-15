@@ -14,7 +14,7 @@ public final class EmbeddedPostgresSupport {
 	private EmbeddedPostgresSupport() {
 	}
 
-	// Restituisce il database di prova. Lo avvia solo la prima volta.
+	// Ritorna il database di prova. Lo avvia solo alla prima chiamata.
 	public static synchronized EmbeddedPostgres get() {
 		if (instance == null) {
 			try {
@@ -28,7 +28,7 @@ public final class EmbeddedPostgresSupport {
 					instance.close();
 				}
 				catch (Exception ignored) {
-					// Se la chiusura fallisce, non serve fare altro.
+					// Se la chiusura va male non c'è altro da fare.
 				}
 			}));
 		}

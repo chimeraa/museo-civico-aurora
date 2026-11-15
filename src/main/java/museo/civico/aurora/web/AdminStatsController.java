@@ -18,7 +18,6 @@ public class AdminStatsController {
 		this.statsService = statsService;
 	}
 
-	// Restituisce le statistiche.
 	@GetMapping
 	public AdminStatsDto stats() {
 		return statsService.getStats();

@@ -4,6 +4,6 @@ package museo.civico.aurora.domain;
 public enum Role {
 	// Chi si registra da solo.
 	VISITOR,
-	// Gestisce eventi, prenotazioni e statistiche.
+	// Gli admin gestiscono eventi, prenotazioni e statistiche.
 	ADMIN
 }

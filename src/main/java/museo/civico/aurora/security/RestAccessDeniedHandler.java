@@ -16,7 +16,8 @@ import museo.civico.aurora.api.ErrorCode;
 import museo.civico.aurora.api.ErrorEnvelope;
 import tools.jackson.databind.json.JsonMapper;
 
-// Utente loggato ma senza permesso: risposta 403. Se manca il token CSRF, lo dice.
+// Accesso negato: risposta 403 in JSON. Se il problema è il token CSRF, il codice
+// di errore cambia.
 @Component
 public class RestAccessDeniedHandler implements AccessDeniedHandler {
 

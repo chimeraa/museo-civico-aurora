@@ -42,7 +42,6 @@ public class EventService {
 		this.clock = clock;
 	}
 
-	// Eventi pubblicati, con filtro per data facoltativo.
 	@Transactional(readOnly = true)
 	public PageDto<EventSummaryDto> listPublic(int page, int size, String from, String to) {
 		Pageable pageable = Paging.validate(page, size, STARTS_AT_ASC);
@@ -79,7 +78,6 @@ public class EventService {
 		return toDetail(event);
 	}
 
-	// Lista degli eventi per l'admin.
 	@Transactional(readOnly = true)
 	public PageDto<AdminEventSummaryDto> listAdmin(int page, int size) {
 		Pageable pageable = Paging.validate(page, size, STARTS_AT_ASC);
@@ -88,7 +86,6 @@ public class EventService {
 		return PageDto.of(result, content);
 	}
 
-	// Dettaglio di un evento per l'admin.
 	@Transactional(readOnly = true)
 	public EventDetailDto getAdminDetail(Long id) {
 		return toDetail(events.findById(id).orElseThrow(EventService::notFound));
@@ -97,7 +94,6 @@ public class EventService {
 	// Crea un evento. Se lo stato non è scritto, l'evento è bozza.
 	@Transactional
 	public EventDetailDto create(EventCreateRequest request) {
-		// Un evento nuovo nasce bozza, a meno che l'admin non scelga lo stato.
 		EventStatus status = request.status() == null ? EventStatus.DRAFT : request.status();
 		validateEditable(status, request.startsAt(), request.endsAt());
 		OffsetDateTime now = OffsetDateTime.now(clock);
@@ -116,7 +112,6 @@ public class EventService {
 					"L'evento annullato non puo' essere modificato.");
 		}
 
-		// Controlli sui dati nuovi.
 		validateEditable(request.status(), request.startsAt(), request.endsAt());
 		// Dopo la pubblicazione non si torna in bozza, altrimenti le prenotazioni resterebbero su un evento nascosto.
 		if (event.getStatus() == EventStatus.PUBLISHED && request.status() == EventStatus.DRAFT) {
@@ -143,7 +138,8 @@ public class EventService {
 		return toDetail(events.save(event));
 	}
 
-	// Se l'evento è già annullato non fa niente. Se è già iniziato non si può annullare.
+	// Se è già annullato risponde 204 senza fare altro, anche se l'evento è iniziato.
+	// Se è iniziato e non è annullato, dà 409.
 	@Transactional
 	public void cancel(Long id) {
 		CulturalEvent event = events.findByIdForUpdate(id).orElseThrow(EventService::notFound);
@@ -162,7 +158,6 @@ public class EventService {
 		bookings.cancelConfirmedByEventId(id, BookingStatus.CONFIRMED, BookingStatus.CANCELLED, now);
 	}
 
-	// Controlla date e stato prima di salvare.
 	private void validateEditable(EventStatus status, OffsetDateTime startsAt, OffsetDateTime endsAt) {
 		// Un evento che finisce prima di iniziare non ha senso.
 		if (startsAt.isAfter(endsAt)) {
@@ -193,10 +188,8 @@ public class EventService {
 				event.getStatus());
 	}
 
-	// Posti liberi: capienza meno le prenotazioni confermate.
 	private int seatsAvailable(CulturalEvent event) {
 		long confirmed = bookings.countByEventIdAndStatus(event.getId(), BookingStatus.CONFIRMED);
-		// Non scendiamo mai sotto zero.
 		return (int) Math.max(0, event.getCapacity() - confirmed);
 	}
 
@@ -209,7 +202,6 @@ public class EventService {
 		return trimmed.isEmpty() ? null : trimmed;
 	}
 
-	// Errore 404 generico.
 	private static ApiException notFound() {
 		return new ApiException(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, "Risorsa non trovata.");
 	}

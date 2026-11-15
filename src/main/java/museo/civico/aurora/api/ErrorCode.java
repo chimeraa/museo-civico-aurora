@@ -27,7 +27,7 @@ public final class ErrorCode {
 	public static final String CONFLICT = "CONFLICT";
 	public static final String INTERNAL_ERROR = "INTERNAL_ERROR";
 
-	// Classe di sole costanti: non serve crearla.
+	// Solo costanti, non si crea l'oggetto.
 	private ErrorCode() {
 	}
 }

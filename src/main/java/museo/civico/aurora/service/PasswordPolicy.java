@@ -16,7 +16,6 @@ public final class PasswordPolicy {
 		return password == null || password.length() < MIN_LENGTH;
 	}
 
-	// Dice se la password supera i 72 byte di BCrypt.
 	public static boolean exceedsBcryptLimit(String password) {
 		return password != null && password.getBytes(StandardCharsets.UTF_8).length > MAX_BCRYPT_BYTES;
 	}
