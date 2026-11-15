@@ -5,13 +5,11 @@ import java.time.Clock;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * Clock UTC iniettabile: l'applicazione usa {@link Clock#systemUTC()}, i test
- * forniscono un clock fisso per rendere deterministici i boundary.
- */
+// Orologio unico per tutta l'app, in UTC.
 @Configuration
 public class ClockConfig {
 
+	// Restituisce l'orologio di sistema in UTC.
 	@Bean
 	public Clock clock() {
 		return Clock.systemUTC();

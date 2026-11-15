@@ -11,6 +11,7 @@ import museo.civico.aurora.dto.EventSummaryDto;
 import museo.civico.aurora.dto.PageDto;
 import museo.civico.aurora.service.EventService;
 
+// API pubblica per vedere gli eventi.
 @RestController
 @RequestMapping("/api/events")
 public class PublicEventController {
@@ -21,6 +22,7 @@ public class PublicEventController {
 		this.eventService = eventService;
 	}
 
+	// Elenco degli eventi pubblicati, con filtro per data facoltativo.
 	@GetMapping
 	public PageDto<EventSummaryDto> list(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "20") int size,
@@ -29,6 +31,7 @@ public class PublicEventController {
 		return eventService.listPublic(page, size, from, to);
 	}
 
+	// Dettaglio di un evento pubblicato.
 	@GetMapping("/{id}")
 	public EventDetailDto detail(@PathVariable Long id) {
 		return eventService.getPublicDetail(id);

@@ -20,6 +20,7 @@ import museo.civico.aurora.dto.RegisterRequest;
 import museo.civico.aurora.dto.UserDto;
 import museo.civico.aurora.repository.AppUserRepository;
 
+// Logica della registrazione.
 @Service
 public class UserService {
 
@@ -33,6 +34,7 @@ public class UserService {
 		this.clock = clock;
 	}
 
+	// Registra un visitatore. Controlla la password e che l'email non sia già usata.
 	@Transactional
 	public UserDto register(RegisterRequest request) {
 		String email = request.email().trim().toLowerCase(Locale.ROOT);
@@ -53,16 +55,17 @@ public class UserService {
 		AppUser user = new AppUser(email, request.displayName().trim(), passwordEncoder.encode(password), Role.VISITOR,
 				OffsetDateTime.now(clock));
 		try {
+			// Se due persone usano la stessa email insieme, il database blocca qui.
 			user = users.saveAndFlush(user);
 		}
 		catch (DataIntegrityViolationException ex) {
-			// Violazione concorrente dell'unicita' case-insensitive: mai 500.
 			throw new ApiException(HttpStatus.CONFLICT, ErrorCode.EMAIL_EXISTS,
 					"Esiste gia' un account con questa email.");
 		}
 		return toDto(user);
 	}
 
+	// Converte l'utente nel formato da mostrare, senza password.
 	public static UserDto toDto(AppUser user) {
 		return new UserDto(user.getId(), user.getEmail(), user.getDisplayName(), user.getRole());
 	}

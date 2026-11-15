@@ -13,9 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import museo.civico.aurora.dto.UserDto;
 import tools.jackson.databind.json.JsonMapper;
 
-/**
- * Login riuscito: risposta JSON 200 con lo {@link UserDto}, nessun redirect.
- */
+// Login riuscito: risponde con i dati dell'utente.
 @Component
 public class JsonLoginSuccessHandler implements AuthenticationSuccessHandler {
 

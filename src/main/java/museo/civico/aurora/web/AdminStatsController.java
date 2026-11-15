@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import museo.civico.aurora.dto.AdminStatsDto;
 import museo.civico.aurora.service.StatsService;
 
+// API admin per le statistiche.
 @RestController
 @RequestMapping("/api/admin/stats")
 public class AdminStatsController {
@@ -17,6 +18,7 @@ public class AdminStatsController {
 		this.statsService = statsService;
 	}
 
+	// Restituisce le statistiche.
 	@GetMapping
 	public AdminStatsDto stats() {
 		return statsService.getStats();

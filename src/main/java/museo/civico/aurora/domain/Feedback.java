@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+// Il giudizio che un utente lascia su un evento.
 @Entity
 @Table(name = "feedback")
 public class Feedback {
@@ -37,10 +38,11 @@ public class Feedback {
 	@Column(name = "created_at", nullable = false)
 	private OffsetDateTime createdAt;
 
+	// Costruttore vuoto per JPA.
 	protected Feedback() {
-		// richiesto da JPA
 	}
 
+	// Crea un nuovo giudizio.
 	public Feedback(CulturalEvent event, AppUser user, Integer rating, String comment, OffsetDateTime createdAt) {
 		this.event = event;
 		this.user = user;

@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+// Un utente salvato nel database.
 @Entity
 @Table(name = "app_user")
 public class AppUser {
@@ -35,10 +36,11 @@ public class AppUser {
 	@Column(name = "created_at", nullable = false)
 	private OffsetDateTime createdAt;
 
+	// Costruttore vuoto: serve a JPA per leggere dal database.
 	protected AppUser() {
-		// richiesto da JPA
 	}
 
+	// Crea un nuovo utente.
 	public AppUser(String email, String displayName, String passwordHash, Role role, OffsetDateTime createdAt) {
 		this.email = email;
 		this.displayName = displayName;

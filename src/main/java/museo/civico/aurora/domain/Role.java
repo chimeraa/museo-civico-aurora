@@ -1,9 +1,6 @@
 package museo.civico.aurora.domain;
 
-/**
- * Ruoli applicativi. Le richieste pubbliche di registrazione creano sempre
- * {@link #VISITOR}.
- */
+// Ruolo dell'utente: visitatore oppure amministratore.
 public enum Role {
 	VISITOR,
 	ADMIN

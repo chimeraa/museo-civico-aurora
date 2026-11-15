@@ -19,12 +19,7 @@ import museo.civico.aurora.domain.Role;
 import museo.civico.aurora.repository.AppUserRepository;
 import museo.civico.aurora.service.PasswordPolicy;
 
-/**
- * Crea l'admin di sviluppo solo quando il profilo {@code dev} e' attivo e
- * {@code APP_ADMIN_EMAIL} e {@code APP_ADMIN_PASSWORD} sono entrambi
- * valorizzati. Nessun default e nessun log di password/hash. I test non
- * dipendono da queste variabili.
- */
+// Crea un admin di prova all'avvio. Funziona solo con il profilo dev e con le variabili impostate.
 @Component
 @Profile("dev")
 public class AdminSeedRunner implements ApplicationRunner {
@@ -47,6 +42,7 @@ public class AdminSeedRunner implements ApplicationRunner {
 		this.adminPassword = adminPassword;
 	}
 
+	// Se email e password sono buone e l'admin non esiste ancora, lo crea.
 	@Override
 	public void run(ApplicationArguments args) {
 		if (!StringUtils.hasText(adminEmail) || !StringUtils.hasText(adminPassword)) {

@@ -6,11 +6,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
 
-/**
- * Avvia una sola istanza condivisa di PostgreSQL 17 embedded (Zonky) e la
- * registra come DataSource del contesto Spring. Nessuna dipendenza da Docker o
- * dal PostgreSQL locale.
- */
+// Avvia un solo PostgreSQL di prova per tutti i test.
 public final class EmbeddedPostgresSupport {
 
 	private static EmbeddedPostgres instance;
@@ -18,6 +14,7 @@ public final class EmbeddedPostgresSupport {
 	private EmbeddedPostgresSupport() {
 	}
 
+	// Restituisce il database di prova. Lo avvia solo la prima volta.
 	public static synchronized EmbeddedPostgres get() {
 		if (instance == null) {
 			try {
@@ -31,13 +28,14 @@ public final class EmbeddedPostgresSupport {
 					instance.close();
 				}
 				catch (Exception ignored) {
-					// chiusura best-effort allo spegnimento della JVM
+					// Se la chiusura fallisce, non serve fare altro.
 				}
 			}));
 		}
 		return instance;
 	}
 
+	// Passa a Spring indirizzo e credenziali del database di prova.
 	public static void registerProperties(DynamicPropertyRegistry registry) {
 		EmbeddedPostgres pg = get();
 		registry.add("spring.datasource.url", () -> pg.getJdbcUrl("postgres", "postgres"));

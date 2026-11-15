@@ -9,13 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import museo.civico.aurora.support.AbstractIntegrationTest;
 
-/**
- * T11 (parte): il contesto si avvia con Flyway come fonte DDL e
- * {@code ddl-auto=validate} su PostgreSQL 17. Verifica anche gli invarianti
- * strutturali principali (indice univoco parziale).
- */
+// Controlla che l'app parta con il database giusto.
 class MuseoCivicoAuroraApplicationTests extends AbstractIntegrationTest {
 
+	// Le tabelle ci sono e le migrazioni sono applicate.
 	@Test
 	void contextLoadsWithMigratedSchema() {
 		List<String> tables = jdbcTemplate

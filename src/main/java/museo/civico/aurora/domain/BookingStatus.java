@@ -1,8 +1,6 @@
 package museo.civico.aurora.domain;
 
-/**
- * Stato di una prenotazione. Una prenotazione equivale a un posto.
- */
+// Stato della prenotazione: confermata oppure annullata.
 public enum BookingStatus {
 	CONFIRMED,
 	CANCELLED

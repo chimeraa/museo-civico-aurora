@@ -1,8 +1,6 @@
 package museo.civico.aurora.domain;
 
-/**
- * Stato del ciclo di vita di un evento culturale. {@link #CANCELLED} e' terminale.
- */
+// Stato dell'evento: bozza, pubblicato o annullato. Annullato è l'ultimo stato.
 public enum EventStatus {
 	DRAFT,
 	PUBLISHED,

@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-/** Registrazione pubblica: crea sempre un VISITOR. */
+// Dati per registrarsi. Chi si registra diventa sempre visitatore.
 public record RegisterRequest(
 		@NotBlank @Email @Size(max = 254) String email,
 		@NotBlank @Size(min = 8) String password,

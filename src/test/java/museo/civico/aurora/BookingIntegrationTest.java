@@ -19,12 +19,10 @@ import museo.civico.aurora.domain.EventStatus;
 import museo.civico.aurora.support.AbstractIntegrationTest;
 import museo.civico.aurora.support.JsonTestSupport;
 
-/**
- * T2 (doppia prenotazione attiva), T3 (annullamento e nuova prenotazione),
- * regole di capienza, proprietario e stato.
- */
+// Test sulle prenotazioni: doppioni, annullamenti, posti pieni e proprietario.
 class BookingIntegrationTest extends AbstractIntegrationTest {
 
+	// Prenotare due volte lo stesso evento dà ALREADY_BOOKED.
 	@Test
 	void duplicateActiveBookingReturnsAlreadyBooked() throws Exception {
 		AppUser visitor = createVisitor("dup@example.com");
@@ -45,6 +43,7 @@ class BookingIntegrationTest extends AbstractIntegrationTest {
 		assertThat(bookingRepository.countByEventIdAndStatus(event.getId(), BookingStatus.CONFIRMED)).isEqualTo(1);
 	}
 
+	// Annullando si libera il posto e si può prenotare di nuovo.
 	@Test
 	void cancelFreesSeatAndAllowsRebook() throws Exception {
 		AppUser visitor = createVisitor("cancel@example.com");
@@ -57,7 +56,7 @@ class BookingIntegrationTest extends AbstractIntegrationTest {
 				.andReturn().getResponse().getContentAsString();
 		long bookingId = JsonTestSupport.extractLong(created, "id");
 
-		// Capienza piena: il posto e' occupato.
+		// Il posto è occupato: un altro utente non può prenotare.
 		AppUser other = createVisitor("other@example.com");
 		mockMvc.perform(post("/api/bookings").with(user(principalOf(other))).with(csrfToken())
 						.contentType(MediaType.APPLICATION_JSON)
@@ -68,17 +67,16 @@ class BookingIntegrationTest extends AbstractIntegrationTest {
 		mockMvc.perform(delete("/api/bookings/" + bookingId).with(user(principalOf(visitor))).with(csrfToken()))
 				.andExpect(status().isNoContent());
 
-		// Idempotente.
 		mockMvc.perform(delete("/api/bookings/" + bookingId).with(user(principalOf(visitor))).with(csrfToken()))
 				.andExpect(status().isNoContent());
 
-		// L'utente puo' riprenotare dopo l'annullamento.
 		mockMvc.perform(post("/api/bookings").with(user(principalOf(visitor))).with(csrfToken())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("{\"eventId\":" + event.getId() + "}"))
 				.andExpect(status().isCreated());
 	}
 
+	// Non si può annullare una prenotazione di un evento già iniziato.
 	@Test
 	void cancellingStartedBookingIsRejected() throws Exception {
 		AppUser visitor = createVisitor("started@example.com");
@@ -91,6 +89,7 @@ class BookingIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("BOOKING_ALREADY_STARTED"));
 	}
 
+	// Annullare due volte una prenotazione già annullata non dà errore.
 	@Test
 	void cancellingAlreadyCancelledStartedBookingIsIdempotent() throws Exception {
 		AppUser visitor = createVisitor("started2@example.com");
@@ -103,6 +102,7 @@ class BookingIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(status().isNoContent());
 	}
 
+	// Non si può annullare la prenotazione di un altro: dà 404.
 	@Test
 	void cancellingForeignBookingReturnsNotFound() throws Exception {
 		AppUser owner = createVisitor("owner@example.com");
@@ -116,6 +116,7 @@ class BookingIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("NOT_FOUND"));
 	}
 
+	// Evento inesistente o non pubblicato: dà 404.
 	@Test
 	void bookingMissingOrUnpublishedEventReturnsNotFound() throws Exception {
 		AppUser visitor = createVisitor("missing@example.com");
@@ -134,6 +135,7 @@ class BookingIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("NOT_FOUND"));
 	}
 
+	// Non si prenota un evento già iniziato.
 	@Test
 	void bookingStartedEventReturnsEventAlreadyStarted() throws Exception {
 		AppUser visitor = createVisitor("late@example.com");
@@ -146,6 +148,7 @@ class BookingIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("EVENT_ALREADY_STARTED"));
 	}
 
+	// L'elenco mostra solo le mie prenotazioni.
 	@Test
 	void myBookingsListsOwnBookings() throws Exception {
 		AppUser visitor = createVisitor("mine@example.com");
@@ -160,6 +163,7 @@ class BookingIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.content[0].eventTitle").value("Mie"));
 	}
 
+	// L'admin annulla una prenotazione, anche due volte.
 	@Test
 	void adminCanCancelBookingAndRepeatedCancelIsIdempotent() throws Exception {
 		AppUser admin = createAdmin("admin-cancel@example.com");
@@ -180,6 +184,7 @@ class BookingIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(status().isNoContent());
 	}
 
+	// Annullare una prenotazione che non esiste dà 404.
 	@Test
 	void adminCancelMissingBookingReturns404() throws Exception {
 		AppUser admin = createAdmin("admin-missing@example.com");
@@ -190,6 +195,7 @@ class BookingIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("NOT_FOUND"));
 	}
 
+	// L'admin non può annullare una prenotazione di un evento già iniziato.
 	@Test
 	void adminCancelStartedBookingReturnsBookingAlreadyStarted() throws Exception {
 		AppUser admin = createAdmin("admin-started@example.com");
@@ -204,6 +210,7 @@ class BookingIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("BOOKING_ALREADY_STARTED"));
 	}
 
+	// Nell'elenco admin si vede il nome del visitatore, non l'email.
 	@Test
 	void adminBookingsListShowsVisitorNameWithoutEmail() throws Exception {
 		AppUser admin = createAdmin("admin-list@example.com");

@@ -16,12 +16,10 @@ import museo.civico.aurora.domain.EventStatus;
 import museo.civico.aurora.domain.Feedback;
 import museo.civico.aurora.support.AbstractIntegrationTest;
 
-/**
- * T10: ogni metrica e il denominatore corrispondono ai valori fixture noti,
- * incluso il caso di capienza totale zero.
- */
+// Test sulle statistiche con dati finti di cui conosciamo i risultati.
 class StatsIntegrationTest extends AbstractIntegrationTest {
 
+	// I numeri calcolati sono quelli attesi.
 	@Test
 	void statsMatchKnownFixture() throws Exception {
 		AppUser admin = createAdmin("stats-admin@example.com");
@@ -43,7 +41,7 @@ class StatsIntegrationTest extends AbstractIntegrationTest {
 		AppUser v8 = createVisitor("s8@example.com");
 		AppUser v9 = createVisitor("s9@example.com");
 
-		// 3 confermate su futuro1, 1 su futuro2, 5 sul passato (fuori dal conteggio atteso).
+		// 3 prenotazioni sul primo evento, 1 sul secondo, 5 su un evento passato.
 		bookingRepository.saveAndFlush(new Booking(future1, v1, BookingStatus.CONFIRMED, NOW));
 		bookingRepository.saveAndFlush(new Booking(future1, v2, BookingStatus.CONFIRMED, NOW));
 		bookingRepository.saveAndFlush(new Booking(future1, v3, BookingStatus.CONFIRMED, NOW));
@@ -53,7 +51,7 @@ class StatsIntegrationTest extends AbstractIntegrationTest {
 		bookingRepository.saveAndFlush(new Booking(past, v7, BookingStatus.CONFIRMED, PAST_START));
 		bookingRepository.saveAndFlush(new Booking(past, v8, BookingStatus.CONFIRMED, PAST_START));
 		bookingRepository.saveAndFlush(new Booking(past, v9, BookingStatus.CONFIRMED, PAST_START));
-		// Una prenotazione annullata non conta.
+		// Questa non conta, perché è annullata.
 		Booking cancelled = new Booking(future1, v5, BookingStatus.CANCELLED, NOW);
 		cancelled.setCancelledAt(NOW);
 		bookingRepository.saveAndFlush(cancelled);
@@ -71,6 +69,7 @@ class StatsIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.feedbackCount").value(2));
 	}
 
+	// Senza eventi futuri le statistiche non danno errore.
 	@Test
 	void statsHandleZeroCapacityDenominator() throws Exception {
 		AppUser admin = createAdmin("zero-admin@example.com");

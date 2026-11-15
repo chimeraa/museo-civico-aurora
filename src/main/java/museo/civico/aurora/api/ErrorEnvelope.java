@@ -4,13 +4,11 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-/**
- * Envelope di errore unico per controller e componenti Security filter-level.
- * {@code fieldErrors} e' omesso quando vuoto.
- */
+// Formato della risposta quando c'è un errore.
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public record ErrorEnvelope(String code, String message, List<FieldError> fieldErrors) {
 
+	// Versione senza errori sui campi.
 	public ErrorEnvelope(String code, String message) {
 		this(code, message, List.of());
 	}

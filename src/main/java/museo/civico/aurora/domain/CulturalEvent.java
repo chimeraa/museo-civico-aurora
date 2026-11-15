@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+// Un evento del museo.
 @Entity
 @Table(name = "cultural_event")
 public class CulturalEvent {
@@ -47,10 +48,11 @@ public class CulturalEvent {
 	@Column(name = "updated_at", nullable = false)
 	private OffsetDateTime updatedAt;
 
+	// Costruttore vuoto per JPA.
 	protected CulturalEvent() {
-		// richiesto da JPA
 	}
 
+	// Crea un nuovo evento.
 	public CulturalEvent(String title, String description, String location, OffsetDateTime startsAt,
 			OffsetDateTime endsAt, Integer capacity, EventStatus status, OffsetDateTime createdAt,
 			OffsetDateTime updatedAt) {

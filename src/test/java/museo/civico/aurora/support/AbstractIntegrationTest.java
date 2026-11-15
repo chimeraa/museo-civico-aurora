@@ -29,10 +29,7 @@ import museo.civico.aurora.repository.CulturalEventRepository;
 import museo.civico.aurora.repository.FeedbackRepository;
 import museo.civico.aurora.security.AppUserPrincipal;
 
-/**
- * Base per i test di integrazione: PostgreSQL 17 embedded, contesto Spring con
- * Flyway + ddl-auto=validate, clock fisso e igiene del database tra i test.
- */
+// Base per i test di integrazione: avvia l'app con un database di prova e un orologio fisso.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -69,35 +66,42 @@ public abstract class AbstractIntegrationTest {
 	@Autowired
 	protected Clock clock;
 
+	// Dice a Spring dove trovare il database di prova.
 	@DynamicPropertySource
 	static void datasourceProperties(DynamicPropertyRegistry registry) {
 		EmbeddedPostgresSupport.registerProperties(registry);
 	}
 
+	// Svuota le tabelle prima di ogni test.
 	@BeforeEach
 	void cleanDatabase() {
 		jdbcTemplate.execute(
 				"TRUNCATE TABLE feedback, booking, cultural_event, app_user RESTART IDENTITY CASCADE");
 	}
 
+	// Crea un visitatore di prova.
 	protected AppUser createVisitor(String email) {
 		return createUser(email, "Visitatore", Role.VISITOR, "password123");
 	}
 
+	// Crea un admin di prova.
 	protected AppUser createAdmin(String email) {
 		return createUser(email, "Amministratore", Role.ADMIN, "password123");
 	}
 
+	// Crea un utente, con la password salvata cifrata.
 	protected AppUser createUser(String email, String displayName, Role role, String rawPassword) {
 		AppUser user = new AppUser(email.trim().toLowerCase(Locale.ROOT), displayName,
 				passwordEncoder.encode(rawPassword), role, NOW);
 		return userRepository.saveAndFlush(user);
 	}
 
+	// Dati di sessione per un utente di prova.
 	protected AppUserPrincipal principalOf(AppUser user) {
 		return AppUserPrincipal.from(user);
 	}
 
+	// Salva un evento di prova nel database.
 	protected CulturalEvent persistEvent(String title, EventStatus status, int capacity, OffsetDateTime startsAt,
 			OffsetDateTime endsAt) {
 		CulturalEvent event = new CulturalEvent(title, "Descrizione di test", "Sala Aurora", startsAt, endsAt,
@@ -105,15 +109,12 @@ public abstract class AbstractIntegrationTest {
 		return eventRepository.saveAndFlush(event);
 	}
 
+	// Salva un evento pubblicato che inizia nel futuro.
 	protected CulturalEvent persistPublishedFutureEvent(String title, int capacity) {
 		return persistEvent(title, EventStatus.PUBLISHED, capacity, FUTURE_START, FUTURE_END);
 	}
 
-	/**
-	 * Recupera un token CSRF reale dal cookie {@code XSRF-TOKEN} e lo invia come
-	 * cookie + header, evitando il post-processor di Spring Security che
-	 * muterebbe lo {@code CsrfFilter} condiviso.
-	 */
+	// Prende un token CSRF vero e lo mette nella richiesta.
 	protected RequestPostProcessor csrfToken() throws Exception {
 		MvcResult result = mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 				.get("/api/auth/csrf"))

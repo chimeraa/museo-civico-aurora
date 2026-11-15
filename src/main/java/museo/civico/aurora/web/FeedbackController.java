@@ -14,6 +14,7 @@ import museo.civico.aurora.dto.FeedbackDto;
 import museo.civico.aurora.security.AppUserPrincipal;
 import museo.civico.aurora.service.FeedbackService;
 
+// API per lasciare un giudizio su un evento.
 @RestController
 public class FeedbackController {
 
@@ -23,6 +24,7 @@ public class FeedbackController {
 		this.feedbackService = feedbackService;
 	}
 
+	// Salva il giudizio dell'utente loggato.
 	@PostMapping("/api/events/{id}/feedback")
 	@ResponseStatus(HttpStatus.CREATED)
 	public FeedbackDto create(@AuthenticationPrincipal AppUserPrincipal principal, @PathVariable Long id,

@@ -11,13 +11,10 @@ import org.junit.jupiter.api.Test;
 
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
 
-/**
- * Scaffold smoke test: boots the embedded PostgreSQL binaries resolved by the
- * imported {@code embedded-postgres-binaries-bom} and verifies the server is
- * PostgreSQL 17.
- */
+// Controlla che il database di test parta e sia PostgreSQL 17.
 class EmbeddedPostgresSmokeTest {
 
+	// Avvia PostgreSQL e controlla la versione.
 	@Test
 	void startsPostgres17AndReportsVersion() throws Exception {
 		try (EmbeddedPostgres pg = EmbeddedPostgres.start();

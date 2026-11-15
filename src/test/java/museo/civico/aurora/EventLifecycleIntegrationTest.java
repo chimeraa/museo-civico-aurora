@@ -18,12 +18,10 @@ import museo.civico.aurora.domain.CulturalEvent;
 import museo.civico.aurora.domain.EventStatus;
 import museo.civico.aurora.support.AbstractIntegrationTest;
 
-/**
- * T8 (validazione e lifecycle evento, bozze invisibili) e T11 (annullamento
- * evento che annulla in transazione le prenotazioni confermate).
- */
+// Test sul ciclo di vita degli eventi: bozze, modifiche e annullamenti.
 class EventLifecycleIntegrationTest extends AbstractIntegrationTest {
 
+	// Il pubblico vede solo gli eventi pubblicati.
 	@Test
 	void publicListHidesDraftsAndCancelled() throws Exception {
 		persistEvent("Pubblicato futuro", EventStatus.PUBLISHED, 10, FUTURE_START, FUTURE_END);
@@ -41,6 +39,7 @@ class EventLifecycleIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("NOT_FOUND"));
 	}
 
+	// Capienza zero o date al contrario danno errore 400.
 	@Test
 	void createEventValidatesCapacityAndDates() throws Exception {
 		AppUser admin = createAdmin("admin@example.com");
@@ -58,6 +57,7 @@ class EventLifecycleIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.fieldErrors[0].field").value("endsAt"));
 	}
 
+	// Un evento pubblicato non può tornare bozza.
 	@Test
 	void publishedCannotReturnToDraft() throws Exception {
 		AppUser admin = createAdmin("admin@example.com");
@@ -71,6 +71,7 @@ class EventLifecycleIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("INVALID_EVENT_STATE"));
 	}
 
+	// La capienza non può scendere sotto le prenotazioni confermate.
 	@Test
 	void capacityBelowConfirmedBookingsIsRejected() throws Exception {
 		AppUser admin = createAdmin("admin@example.com");
@@ -88,6 +89,7 @@ class EventLifecycleIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("CAPACITY_BELOW_BOOKINGS"));
 	}
 
+	// Annullando un evento si annullano anche le sue prenotazioni.
 	@Test
 	void cancelEventCancelsConfirmedBookingsTransactionally() throws Exception {
 		AppUser admin = createAdmin("admin@example.com");
@@ -106,12 +108,12 @@ class EventLifecycleIntegrationTest extends AbstractIntegrationTest {
 		assertThat(eventRepository.findById(event.getId()).orElseThrow().getStatus())
 				.isEqualTo(EventStatus.CANCELLED);
 
-		// Idempotente: 204 anche se gia' annullato.
 		mockMvc.perform(post("/api/admin/events/" + event.getId() + "/cancel")
 						.with(user(principalOf(admin))).with(csrfToken()))
 				.andExpect(status().isNoContent());
 	}
 
+	// Un evento già iniziato non si può annullare.
 	@Test
 	void cancelStartedEventIsRejected() throws Exception {
 		AppUser admin = createAdmin("admin@example.com");
@@ -123,6 +125,7 @@ class EventLifecycleIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("EVENT_CANNOT_BE_CANCELLED"));
 	}
 
+	// Un evento annullato non si può modificare.
 	@Test
 	void updateCancelledEventIsRejected() throws Exception {
 		AppUser admin = createAdmin("admin@example.com");
@@ -136,6 +139,7 @@ class EventLifecycleIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("INVALID_EVENT_STATE"));
 	}
 
+	// Modificare un evento che non esiste dà 404, anche se i dati non vanno bene.
 	@Test
 	void updateUnknownEventReturns404BeforePayloadValidation() throws Exception {
 		AppUser admin = createAdmin("admin-unknown@example.com");
@@ -148,6 +152,7 @@ class EventLifecycleIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("NOT_FOUND"));
 	}
 
+	// Descrizione troppo lunga: errore 400.
 	@Test
 	void createEventWithTooLongDescriptionReturns400() throws Exception {
 		AppUser admin = createAdmin("admin-description@example.com");
@@ -162,6 +167,7 @@ class EventLifecycleIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.fieldErrors[0].field").value("description"));
 	}
 
+	// Stato che non esiste: errore 400.
 	@Test
 	void createEventWithUnknownStatusReturns400() throws Exception {
 		AppUser admin = createAdmin("admin-status@example.com");
@@ -175,12 +181,14 @@ class EventLifecycleIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
 	}
 
+	// Crea il JSON di un evento per i test.
 	private static String eventJson(String title, int capacity, String startsAt, String endsAt) {
 		return """
 				{"title":"%s","description":"desc","location":"Sala","startsAt":"%s","endsAt":"%s","capacity":%d}
 				""".formatted(title, startsAt, endsAt, capacity);
 	}
 
+	// Come sopra, ma con anche lo stato.
 	private static String eventJsonWithStatus(String title, int capacity, String startsAt, String endsAt,
 			String status) {
 		return """

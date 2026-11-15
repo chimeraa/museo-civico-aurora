@@ -26,6 +26,7 @@ import museo.civico.aurora.dto.PageDto;
 import museo.civico.aurora.repository.BookingRepository;
 import museo.civico.aurora.repository.CulturalEventRepository;
 
+// Logica degli eventi: lista, dettaglio, creazione, modifica e annullamento.
 @Service
 public class EventService {
 
@@ -41,6 +42,7 @@ public class EventService {
 		this.clock = clock;
 	}
 
+	// Eventi pubblicati, con filtro per data facoltativo.
 	@Transactional(readOnly = true)
 	public PageDto<EventSummaryDto> listPublic(int page, int size, String from, String to) {
 		Pageable pageable = Paging.validate(page, size, STARTS_AT_ASC);
@@ -66,6 +68,7 @@ public class EventService {
 		return PageDto.of(result, content);
 	}
 
+	// Dettaglio di un evento pubblicato. Se è bozza o annullato, risponde 404.
 	@Transactional(readOnly = true)
 	public EventDetailDto getPublicDetail(Long id) {
 		CulturalEvent event = events.findById(id)
@@ -74,6 +77,7 @@ public class EventService {
 		return toDetail(event);
 	}
 
+	// Lista degli eventi per l'admin.
 	@Transactional(readOnly = true)
 	public PageDto<AdminEventSummaryDto> listAdmin(int page, int size) {
 		Pageable pageable = Paging.validate(page, size, STARTS_AT_ASC);
@@ -82,11 +86,13 @@ public class EventService {
 		return PageDto.of(result, content);
 	}
 
+	// Dettaglio di un evento per l'admin.
 	@Transactional(readOnly = true)
 	public EventDetailDto getAdminDetail(Long id) {
 		return toDetail(events.findById(id).orElseThrow(EventService::notFound));
 	}
 
+	// Crea un evento. Se lo stato non è scritto, l'evento è bozza.
 	@Transactional
 	public EventDetailDto create(EventCreateRequest request) {
 		EventStatus status = request.status() == null ? EventStatus.DRAFT : request.status();
@@ -97,6 +103,7 @@ public class EventService {
 		return toDetail(events.save(event));
 	}
 
+	// Modifica un evento, con i controlli su stato, date e posti.
 	@Transactional
 	public EventDetailDto update(Long id, EventUpdateRequest request) {
 		CulturalEvent event = events.findByIdForUpdate(id).orElseThrow(EventService::notFound);
@@ -106,12 +113,14 @@ public class EventService {
 					"L'evento annullato non puo' essere modificato.");
 		}
 
+		// Controlli sui dati nuovi.
 		validateEditable(request.status(), request.startsAt(), request.endsAt());
 		if (event.getStatus() == EventStatus.PUBLISHED && request.status() == EventStatus.DRAFT) {
 			throw new ApiException(HttpStatus.CONFLICT, ErrorCode.INVALID_EVENT_STATE,
 					"Un evento pubblicato non puo' tornare in bozza.");
 		}
 
+		// Non si può ridurre la capienza sotto le prenotazioni già fatte.
 		long confirmed = bookings.countByEventIdAndStatus(id, BookingStatus.CONFIRMED);
 		if (request.capacity() < confirmed) {
 			throw new ApiException(HttpStatus.CONFLICT, ErrorCode.CAPACITY_BELOW_BOOKINGS,
@@ -129,11 +138,12 @@ public class EventService {
 		return toDetail(events.save(event));
 	}
 
+	// Se l'evento è già annullato non fa niente. Se è già iniziato non si può annullare.
 	@Transactional
 	public void cancel(Long id) {
 		CulturalEvent event = events.findByIdForUpdate(id).orElseThrow(EventService::notFound);
 		if (event.getStatus() == EventStatus.CANCELLED) {
-			return; // idempotente: 204 anche se gia' annullato
+			return;
 		}
 		OffsetDateTime now = OffsetDateTime.now(clock);
 		if (!now.isBefore(event.getStartsAt())) {
@@ -146,6 +156,7 @@ public class EventService {
 		bookings.cancelConfirmedByEventId(id, BookingStatus.CONFIRMED, BookingStatus.CANCELLED, now);
 	}
 
+	// Controlla date e stato prima di salvare.
 	private void validateEditable(EventStatus status, OffsetDateTime startsAt, OffsetDateTime endsAt) {
 		if (startsAt.isAfter(endsAt)) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR,
@@ -175,11 +186,13 @@ public class EventService {
 				event.getStatus());
 	}
 
+	// Posti liberi: capienza meno le prenotazioni confermate.
 	private int seatsAvailable(CulturalEvent event) {
 		long confirmed = bookings.countByEventIdAndStatus(event.getId(), BookingStatus.CONFIRMED);
 		return (int) Math.max(0, event.getCapacity() - confirmed);
 	}
 
+	// Toglie gli spazi. Se resta vuoto, restituisce null.
 	private static String trimToNull(String value) {
 		if (value == null) {
 			return null;
@@ -188,6 +201,7 @@ public class EventService {
 		return trimmed.isEmpty() ? null : trimmed;
 	}
 
+	// Errore 404 generico.
 	private static ApiException notFound() {
 		return new ApiException(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, "Risorsa non trovata.");
 	}

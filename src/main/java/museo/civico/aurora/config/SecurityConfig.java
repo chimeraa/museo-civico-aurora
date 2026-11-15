@@ -21,25 +21,18 @@ import museo.civico.aurora.security.JsonLoginSuccessHandler;
 import museo.civico.aurora.security.RestAccessDeniedHandler;
 import museo.civico.aurora.security.RestAuthenticationEntryPoint;
 
-/**
- * Sicurezza HTTP: catena API ordinata prima della catena statica del frontend.
- * Nessuna configurazione CORS.
- */
+// Regole di sicurezza: chi può vedere cosa, login, logout e token CSRF.
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+	// Il modo in cui le password vengono cifrate.
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BoundedBcryptPasswordEncoder();
 	}
 
-	/**
-	 * Repository CSRF per SPA: cookie leggibile dal frontend, header e nomi
-	 * allineati al contratto frozen ({@code X-XSRF-TOKEN} / {@code XSRF-TOKEN}).
-	 * Il cookie e' sempre {@code SameSite=Lax}; l'attributo {@code Secure} segue
-	 * {@code app.csrf.cookie.secure} (false in locale, true nel profilo HTTPS).
-	 */
+	// Dove salvare il token CSRF: nel cookie, così il frontend può leggerlo.
 	@Bean
 	public CsrfTokenRepository csrfTokenRepository(
 			@Value("${app.csrf.cookie.secure:false}") boolean csrfCookieSecure) {
@@ -51,6 +44,7 @@ public class SecurityConfig {
 		return repository;
 	}
 
+	// Regole per le API (/api/...). Risponde sempre in JSON.
 	@Bean
 	@Order(1)
 	public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http,
@@ -89,6 +83,7 @@ public class SecurityConfig {
 		return http.build();
 	}
 
+	// Regole per le pagine del sito (html, css, js): sono tutte pubbliche.
 	@Bean
 	@Order(2)
 	public SecurityFilterChain frontendSecurityFilterChain(HttpSecurity http) throws Exception {

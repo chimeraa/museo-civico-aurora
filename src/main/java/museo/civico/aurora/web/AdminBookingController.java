@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import museo.civico.aurora.service.BookingService;
 
+// API admin per le prenotazioni.
 @RestController
 @RequestMapping("/api/admin/bookings")
 public class AdminBookingController {
@@ -19,6 +20,7 @@ public class AdminBookingController {
 		this.bookingService = bookingService;
 	}
 
+	// Annulla una prenotazione.
 	@PostMapping("/{id}/cancel")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void cancel(@PathVariable Long id) {

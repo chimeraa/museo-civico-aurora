@@ -28,6 +28,7 @@ import museo.civico.aurora.repository.BookingRepository;
 import museo.civico.aurora.repository.CulturalEventRepository;
 import museo.civico.aurora.security.AppUserPrincipal;
 
+// Logica delle prenotazioni: controlla posti, date e proprietà.
 @Service
 public class BookingService {
 
@@ -46,24 +47,23 @@ public class BookingService {
 		this.clock = clock;
 	}
 
-	/**
-	 * Prenotazione in un'unica transazione: lock pessimistico della riga evento,
-	 * controlli di stato/tempo/capienza, inserimento. Un'eventuale violazione
-	 * dell'unicita' attiva concorrente e' mappata a 409, mai a 500.
-	 */
+	// Prenota un posto. Blocca l'evento, così due persone non prendono l'ultimo posto insieme.
 	@Transactional
 	public BookingDto create(AppUserPrincipal principal, BookingCreateRequest request) {
 		CulturalEvent event = events.findByIdForUpdate(request.eventId()).orElse(null);
+		// L'evento non c'è o non è pubblicato: 404.
 		if (event == null || event.getStatus() != EventStatus.PUBLISHED) {
 			throw notFound();
 		}
 
 		OffsetDateTime now = OffsetDateTime.now(clock);
+		// Se l'evento è già iniziato non si prenota più.
 		if (!now.isBefore(event.getStartsAt())) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, ErrorCode.EVENT_ALREADY_STARTED,
 					"L'evento e' gia' iniziato.");
 		}
 
+		// Conta i posti già presi e controlla se ce n'è ancora uno.
 		long confirmed = bookings.countByEventIdAndStatus(event.getId(), BookingStatus.CONFIRMED);
 		if (confirmed >= event.getCapacity()) {
 			throw new ApiException(HttpStatus.CONFLICT, ErrorCode.EVENT_FULL,
@@ -74,6 +74,7 @@ public class BookingService {
 
 		Booking booking = new Booking(event, user, BookingStatus.CONFIRMED, now);
 		try {
+			// Salva subito: se il posto è già preso per lo stesso utente, il database blocca qui.
 			booking = bookings.saveAndFlush(booking);
 		}
 		catch (DataIntegrityViolationException ex) {
@@ -83,6 +84,7 @@ public class BookingService {
 		return toDto(booking);
 	}
 
+	// Prenotazioni dell'utente, a pagine.
 	@Transactional(readOnly = true)
 	public PageDto<BookingDto> listMine(AppUserPrincipal principal, int page, int size) {
 		Pageable pageable = Paging.validate(page, size, CREATED_AT_DESC);
@@ -91,16 +93,18 @@ public class BookingService {
 		return PageDto.of(result, content);
 	}
 
+	// Annulla una mia prenotazione.
 	@Transactional
 	public void cancelMine(AppUserPrincipal principal, Long bookingId) {
 		Booking booking = bookings.findById(bookingId).orElseThrow(BookingService::notFound);
+		// La prenotazione è di un altro utente: 404, come se non esistesse.
 		if (!booking.getUser().getId().equals(principal.getId())) {
-			// Non rivelare l'esistenza di ID altrui.
 			throw notFound();
 		}
 		cancel(booking);
 	}
 
+	// Prenotazioni di un evento, per l'admin.
 	@Transactional(readOnly = true)
 	public PageDto<AdminBookingDto> listForEvent(Long eventId, int page, int size) {
 		if (!events.existsById(eventId)) {
@@ -112,14 +116,17 @@ public class BookingService {
 		return PageDto.of(result, content);
 	}
 
+	// L'admin annulla una prenotazione.
 	@Transactional
 	public void cancelByAdmin(Long bookingId) {
 		cancel(bookings.findById(bookingId).orElseThrow(BookingService::notFound));
 	}
 
+	// Annulla la prenotazione, se non è già annullata e l'evento non è ancora iniziato.
 	private void cancel(Booking booking) {
+		// Già annullata: non serve fare niente.
 		if (booking.getStatus() == BookingStatus.CANCELLED) {
-			return; // idempotente: 204 anche dopo l'inizio
+			return;
 		}
 		OffsetDateTime now = OffsetDateTime.now(clock);
 		if (!now.isBefore(booking.getEvent().getStartsAt())) {
@@ -144,6 +151,7 @@ public class BookingService {
 				booking.getUser().getDisplayName());
 	}
 
+	// Errore 404 generico.
 	private static ApiException notFound() {
 		return new ApiException(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, "Risorsa non trovata.");
 	}

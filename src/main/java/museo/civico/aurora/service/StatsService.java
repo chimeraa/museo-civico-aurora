@@ -15,9 +15,7 @@ import museo.civico.aurora.repository.BookingRepository;
 import museo.civico.aurora.repository.CulturalEventRepository;
 import museo.civico.aurora.repository.FeedbackRepository;
 
-/**
- * Indicatori aggregati secondo le formule del contratto.
- */
+// Calcola le statistiche per l'admin.
 @Service
 public class StatsService {
 
@@ -34,6 +32,7 @@ public class StatsService {
 		this.clock = clock;
 	}
 
+	// Calcola tutti i numeri delle statistiche.
 	@Transactional(readOnly = true)
 	public AdminStatsDto getStats() {
 		OffsetDateTime now = OffsetDateTime.now(clock);
@@ -44,9 +43,11 @@ public class StatsService {
 				EventStatus.PUBLISHED, now);
 		long totalCapacity = events.sumCapacityByStatusAndStartsAtGreaterThanEqual(EventStatus.PUBLISHED, now);
 
+		// Percentuale di posti occupati. Se non ci sono posti, è 0.
 		double utilization = totalCapacity == 0 ? 0.0
 				: (100.0 * confirmedBookingCount) / totalCapacity;
 
+		// Media dei voti, arrotondata a due cifre.
 		Double rawAverage = feedbacks.averageRating();
 		Double averageRating = rawAverage == null ? null
 				: BigDecimal.valueOf(rawAverage).setScale(2, RoundingMode.HALF_UP).doubleValue();

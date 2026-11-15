@@ -10,10 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import museo.civico.aurora.domain.AppUser;
 import museo.civico.aurora.domain.Role;
 
-/**
- * Principal applicativo: contiene i dati di sessione necessari ai controller e
- * al success handler JSON. Non viene mai serializzato come entity.
- */
+// I dati dell'utente loggato, salvati nella sessione.
 public class AppUserPrincipal implements UserDetails {
 
 	private final Long id;
@@ -30,6 +27,7 @@ public class AppUserPrincipal implements UserDetails {
 		this.role = role;
 	}
 
+	// Crea i dati di sessione partendo dall'utente del database.
 	public static AppUserPrincipal from(AppUser user) {
 		return new AppUserPrincipal(user.getId(), user.getEmail(), user.getDisplayName(), user.getPasswordHash(),
 				user.getRole());
@@ -47,6 +45,7 @@ public class AppUserPrincipal implements UserDetails {
 		return role;
 	}
 
+	// Il ruolo dell'utente, con il prefisso ROLE_ che vuole Spring.
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));

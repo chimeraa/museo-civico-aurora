@@ -14,12 +14,10 @@ import museo.civico.aurora.domain.CulturalEvent;
 import museo.civico.aurora.domain.EventStatus;
 import museo.civico.aurora.support.AbstractIntegrationTest;
 
-/**
- * T9 (feedback: range del rating e unicita' per utente/evento) e visibilita'
- * del giudizio amministrativo senza email.
- */
+// Test sui giudizi degli eventi.
 class FeedbackIntegrationTest extends AbstractIntegrationTest {
 
+	// Un voto fuori da 1 a 5 dà errore 400.
 	@Test
 	void ratingOutOfRangeIsRejected() throws Exception {
 		AppUser visitor = createVisitor("rating@example.com");
@@ -33,6 +31,7 @@ class FeedbackIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
 	}
 
+	// Commento troppo lungo: errore 400.
 	@Test
 	void commentOver2000CharsIsRejected() throws Exception {
 		AppUser visitor = createVisitor("long-comment@example.com");
@@ -48,6 +47,7 @@ class FeedbackIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.fieldErrors[0].field").value("comment"));
 	}
 
+	// Stesso utente e stesso evento due volte: errore 409.
 	@Test
 	void duplicateFeedbackForSameUserIsConflict() throws Exception {
 		AppUser visitor = createVisitor("feedback@example.com");
@@ -68,6 +68,7 @@ class FeedbackIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("FEEDBACK_EXISTS"));
 	}
 
+	// Si può giudicare un evento concluso, ma non una bozza o un annullato.
 	@Test
 	void feedbackAllowedOnConcludedEventButNotOnDraftOrCancelled() throws Exception {
 		AppUser visitor = createVisitor("concluded@example.com");
@@ -96,6 +97,7 @@ class FeedbackIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(status().isNotFound());
 	}
 
+	// Nell'elenco admin dei giudizi non compare l'email.
 	@Test
 	void adminFeedbackListHidesEmail() throws Exception {
 		AppUser visitor = createVisitor("shown@example.com");

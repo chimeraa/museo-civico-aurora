@@ -5,13 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import museo.civico.aurora.service.PasswordPolicy;
 
-/**
- * {@link PasswordEncoder} limitato al massimo BCrypt (72 byte UTF-8). L'
- * {@code encode} delega al BCrypt standard (la registrazione valida gia' la
- * lunghezza), mentre {@code matches} restituisce {@code false} per input oltre
- * il limite invece di propagare un errore: un login con password troppo lunga
- * produce {@code 401 INVALID_CREDENTIALS}, mai {@code 500}.
- */
+// Cifra le password con BCrypt. BCrypt accetta solo 72 byte.
 public class BoundedBcryptPasswordEncoder implements PasswordEncoder {
 
 	private final BCryptPasswordEncoder delegate = new BCryptPasswordEncoder();
@@ -21,6 +15,7 @@ public class BoundedBcryptPasswordEncoder implements PasswordEncoder {
 		return delegate.encode(rawPassword);
 	}
 
+	// Se la password è troppo lunga restituisce false, senza dare errore.
 	@Override
 	public boolean matches(CharSequence rawPassword, String encodedPassword) {
 		if (rawPassword == null || PasswordPolicy.exceedsBcryptLimit(rawPassword.toString())) {

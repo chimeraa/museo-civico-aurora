@@ -19,6 +19,7 @@ import museo.civico.aurora.dto.UserDto;
 import museo.civico.aurora.security.AppUserPrincipal;
 import museo.civico.aurora.service.UserService;
 
+// API per registrazione, dati utente e token CSRF. Login e logout li gestisce Spring Security.
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -31,10 +32,7 @@ public class AuthController {
 		this.userService = userService;
 	}
 
-	/**
-	 * Materializza il token CSRF (cookie XSRF-TOKEN) e ne restituisce i nomi.
-	 * Accessibile prima del login.
-	 */
+	// Dà al frontend il token CSRF, da mandare nelle richieste che cambiano dati.
 	@GetMapping("/csrf")
 	public CsrfTokenDto csrf(CsrfToken csrfToken, HttpServletRequest request) {
 		DeferredCsrfToken deferred = (DeferredCsrfToken) request.getAttribute(DeferredCsrfToken.class.getName());
@@ -42,12 +40,14 @@ public class AuthController {
 		return new CsrfTokenDto(token, csrfToken.getHeaderName(), csrfToken.getParameterName(), CSRF_COOKIE_NAME);
 	}
 
+	// Registra un nuovo visitatore.
 	@PostMapping("/register")
 	@ResponseStatus(HttpStatus.CREATED)
 	public UserDto register(@Valid @RequestBody RegisterRequest request) {
 		return userService.register(request);
 	}
 
+	// Dati dell'utente loggato.
 	@GetMapping("/me")
 	public UserDto me(@AuthenticationPrincipal AppUserPrincipal principal) {
 		return new UserDto(principal.getId(), principal.getUsername(), principal.getDisplayName(), principal.getRole());

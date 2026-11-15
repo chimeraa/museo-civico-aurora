@@ -16,10 +16,7 @@ import museo.civico.aurora.api.ErrorCode;
 import museo.civico.aurora.api.ErrorEnvelope;
 import tools.jackson.databind.json.JsonMapper;
 
-/**
- * Access denied handler JSON condiviso: riconosce le eccezioni CSRF e le
- * distingue dal diniego di ruolo.
- */
+// Utente loggato ma senza permesso: risposta 403. Se manca il token CSRF, lo dice.
 @Component
 public class RestAccessDeniedHandler implements AccessDeniedHandler {
 

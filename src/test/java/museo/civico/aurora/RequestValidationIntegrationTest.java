@@ -14,12 +14,10 @@ import museo.civico.aurora.domain.CulturalEvent;
 import museo.civico.aurora.domain.EventStatus;
 import museo.civico.aurora.support.AbstractIntegrationTest;
 
-/**
- * T12: paginazione e intervallo temporale invalidi -> 400; media type errato ->
- * 415; pagina oltre l'ultima -> 200 con content vuoto.
- */
+// Test su pagine, date e formato delle richieste.
 class RequestValidationIntegrationTest extends AbstractIntegrationTest {
 
+	// Pagina o dimensione sbagliate danno 400.
 	@Test
 	void invalidPageAndSizeReturn400() throws Exception {
 		mockMvc.perform(get("/api/events").param("page", "-1"))
@@ -35,6 +33,7 @@ class RequestValidationIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("INVALID_PAGE_SIZE"));
 	}
 
+	// Data di inizio dopo quella di fine: errore 400.
 	@Test
 	void invalidTimeRangeReturns400() throws Exception {
 		mockMvc.perform(get("/api/events")
@@ -44,6 +43,7 @@ class RequestValidationIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("INVALID_TIME_RANGE"));
 	}
 
+	// Una pagina oltre l'ultima è vuota, ma non è un errore.
 	@Test
 	void pageBeyondLastReturnsEmpty200() throws Exception {
 		persistPublishedFutureEvent("Unico", 5);
@@ -54,6 +54,7 @@ class RequestValidationIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.page").value(999));
 	}
 
+	// La dimensione 50, il massimo, è accettata.
 	@Test
 	void sizeAtMaximumIsAccepted() throws Exception {
 		persistPublishedFutureEvent("Dimensione massima", 5);
@@ -64,6 +65,7 @@ class RequestValidationIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.totalElements").value(1));
 	}
 
+	// Il filtro per date include anche gli estremi.
 	@Test
 	void temporalFilterFromAndToAreInclusive() throws Exception {
 		persistEvent("Boundary", EventStatus.PUBLISHED, 5, FUTURE_START, FUTURE_END);
@@ -76,6 +78,7 @@ class RequestValidationIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.content[0].title").value("Boundary"));
 	}
 
+	// Un formato che non è JSON dà errore 415.
 	@Test
 	void unsupportedMediaTypeReturns415() throws Exception {
 		mockMvc.perform(post("/api/auth/register").with(csrfToken())
@@ -85,6 +88,7 @@ class RequestValidationIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("UNSUPPORTED_MEDIA_TYPE"));
 	}
 
+	// Anche per le mie prenotazioni, pagina sbagliata dà 400.
 	@Test
 	void authenticatedPaginationInvalidReturns400() throws Exception {
 		AppUser visitor = createVisitor("paging@example.com");
@@ -98,11 +102,11 @@ class RequestValidationIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("INVALID_PAGE_SIZE"));
 	}
 
+	// Un id evento non valido, come 0, dà 400.
 	@Test
 	void bookingWithoutValidEventIdReturns400() throws Exception {
 		AppUser visitor = createVisitor("invalid-booking@example.com");
 		CulturalEvent event = persistPublishedFutureEvent("Evento", 5);
-		// Sanity: l'evento esiste, ma il body non e' valido.
 		mockMvc.perform(post("/api/bookings").with(user(principalOf(visitor))).with(csrfToken())
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("{\"eventId\":0}"))

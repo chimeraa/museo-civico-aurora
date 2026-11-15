@@ -26,16 +26,13 @@ import museo.civico.aurora.security.AppUserPrincipal;
 import museo.civico.aurora.service.BookingService;
 import museo.civico.aurora.support.AbstractIntegrationTest;
 
-/**
- * T1 (nessun overbooking con M richieste concorrenti per capienza N) e T2
- * (doppia prenotazione attiva in race: unique violation DB mappata a 409).
- * Usa transazioni e thread distinti, senza transazione esterna del test.
- */
+// Test di prenotazioni fatte insieme da più persone nello stesso momento.
 class BookingConcurrencyTest extends AbstractIntegrationTest {
 
 	@Autowired
 	private BookingService bookingService;
 
+	// Con 8 persone e 3 posti, solo 3 riescono a prenotare.
 	@Test
 	void concurrentBookingsNeverExceedCapacity() throws Exception {
 		int capacity = 3;
@@ -82,6 +79,7 @@ class BookingConcurrencyTest extends AbstractIntegrationTest {
 		assertThat(outcomes.getOrDefault("EVENT_FULL", new AtomicInteger()).get()).isEqualTo(attempts - capacity);
 	}
 
+	// Lo stesso utente prenota due volte insieme: resta una sola prenotazione.
 	@Test
 	void concurrentDuplicateBookingsProduceSingleActiveBooking() throws Exception {
 		CulturalEvent event = persistPublishedFutureEvent("Concorrenza duplicati", 5);
@@ -113,6 +111,7 @@ class BookingConcurrencyTest extends AbstractIntegrationTest {
 		assertThat(bookingRepository.countByEventIdAndStatus(event.getId(), BookingStatus.CONFIRMED)).isEqualTo(1);
 	}
 
+	// Prova a prenotare e conta se ha funzionato.
 	private Void book(AppUserPrincipal principal, Long eventId, CountDownLatch start, AtomicInteger successes,
 			AtomicInteger conflicts) throws InterruptedException {
 		start.await(10, TimeUnit.SECONDS);

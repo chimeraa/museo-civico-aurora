@@ -2,6 +2,6 @@ package museo.civico.aurora.dto;
 
 import museo.civico.aurora.domain.Role;
 
-/** DTO pubblico utente: mai password o hash. */
+// Dati pubblici dell'utente. Non contiene mai la password.
 public record UserDto(Long id, String email, String displayName, Role role) {
 }

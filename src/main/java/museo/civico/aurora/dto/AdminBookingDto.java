@@ -4,7 +4,7 @@ import java.time.OffsetDateTime;
 
 import museo.civico.aurora.domain.BookingStatus;
 
-/** Prenotazione in vista amministrativa: aggiunge solo il nome visualizzato. */
+// Prenotazione vista dall'admin. Mostra il nome del visitatore, mai l'email.
 public record AdminBookingDto(Long id, Long eventId, String eventTitle, OffsetDateTime startsAt, BookingStatus status,
 		OffsetDateTime createdAt, OffsetDateTime cancelledAt, String visitorDisplayName) {
 }

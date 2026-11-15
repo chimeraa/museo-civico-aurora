@@ -15,9 +15,7 @@ import museo.civico.aurora.api.ErrorCode;
 import museo.civico.aurora.api.ErrorEnvelope;
 import tools.jackson.databind.json.JsonMapper;
 
-/**
- * Entry point JSON della catena API: nessun redirect HTML, envelope 401.
- */
+// Richiesta fatta senza essere loggati: risposta 401.
 @Component
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 

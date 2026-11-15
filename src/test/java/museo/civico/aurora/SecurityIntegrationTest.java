@@ -22,12 +22,10 @@ import museo.civico.aurora.domain.Role;
 import museo.civico.aurora.support.AbstractIntegrationTest;
 import museo.civico.aurora.support.JsonTestSupport;
 
-/**
- * T4 (401/redirect), T5 (autorizzazione admin), T6 (CSRF), T7 (registrazione,
- * email, password).
- */
+// Test di sicurezza: login, logout, token CSRF, registrazione e ruoli.
 class SecurityIntegrationTest extends AbstractIntegrationTest {
 
+	// Il token CSRF arriva con i nomi giusti.
 	@Test
 	void csrfEndpointExposesTokenAndCookieNames() throws Exception {
 		mockMvc.perform(get("/api/auth/csrf"))
@@ -39,6 +37,7 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(cookie().exists("XSRF-TOKEN"));
 	}
 
+	// Il cookie CSRF è Lax e, in locale, non è Secure.
 	@Test
 	void csrfCookieIsSameSiteLaxAndNotSecureOverLocalHttp() throws Exception {
 		MvcResult result = mockMvc.perform(get("/api/auth/csrf"))
@@ -47,8 +46,6 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
 
 		Cookie csrfCookie = result.getResponse().getCookie("XSRF-TOKEN");
 		assertThat(csrfCookie).isNotNull();
-		// Servlet 6 mappa il ResponseCookie su un Cookie: SameSite resta un
-		// attributo del cookie, non serializzato nel Set-Cookie grezzo da MockMvc.
 		assertThat(csrfCookie.getAttribute("SameSite")).isEqualTo("Lax");
 		assertThat(csrfCookie.getSecure()).isFalse();
 
@@ -60,6 +57,7 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
 		assertThat(csrfHeader).doesNotContain("Secure");
 	}
 
+	// La registrazione crea un visitatore e cifra la password. Il ruolo mandato dal client viene ignorato.
 	@Test
 	void registerCreatesVisitorAndHashesPassword() throws Exception {
 		mockMvc.perform(post("/api/auth/register").with(csrfToken())
@@ -78,6 +76,7 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
 		assertThat(passwordEncoder.matches("password123", stored.getPasswordHash())).isTrue();
 	}
 
+	// Email già usata, anche con maiuscole diverse: EMAIL_EXISTS.
 	@Test
 	void registerDuplicateCaseVariantReturnsEmailExists() throws Exception {
 		createVisitor("duplicate@example.com");
@@ -91,6 +90,7 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("EMAIL_EXISTS"));
 	}
 
+	// Password troppo lunga: errore 400 sul campo password.
 	@Test
 	void registerPasswordOver72BytesReturnsValidationError() throws Exception {
 		String longPassword = "a".repeat(73);
@@ -104,6 +104,7 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.fieldErrors[0].field").value("password"));
 	}
 
+	// Login, dati utente e logout funzionano insieme.
 	@Test
 	void loginFormFlowMeAndLogout() throws Exception {
 		AppUser visitor = createVisitor("login@example.com");
@@ -132,6 +133,7 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("UNAUTHENTICATED"));
 	}
 
+	// Password sbagliata: 401 in JSON.
 	@Test
 	void loginWrongPasswordReturnsJson401() throws Exception {
 		createVisitor("wrong@example.com");
@@ -144,6 +146,7 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"));
 	}
 
+	// Password troppo lunga al login: 401, mai 500.
 	@Test
 	void loginPasswordOver72BytesReturnsJson401() throws Exception {
 		createVisitor("overlong@example.com");
@@ -157,6 +160,7 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"));
 	}
 
+	// Il token CSRF cambia dopo il login e funziona anche dopo il logout.
 	@Test
 	void csrfTokenIsRotatedAndUsableAcrossLoginAndLogout() throws Exception {
 		createVisitor("lifecycle@example.com");
@@ -178,7 +182,6 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
 		MockHttpSession session = (MockHttpSession) login.getRequest().getSession(false);
 		assertThat(session).isNotNull();
 
-		// GET richiesto dal frontend dopo il login: token/cookie freschi e usabili.
 		MvcResult refreshed = mockMvc.perform(get("/api/auth/csrf").session(session))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.token").isNotEmpty())
@@ -189,14 +192,12 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
 		String postAuthToken = JsonTestSupport.extractString(refreshed.getResponse().getContentAsString(), "token");
 		assertThat(postAuthToken).isNotEqualTo(initialToken);
 
-		// Il token post-auth e' quello usato per la successiva richiesta unsafe.
 		mockMvc.perform(post("/api/auth/logout")
 						.session(session)
 						.cookie(refreshedCookie)
 						.header("X-XSRF-TOKEN", postAuthToken))
 				.andExpect(status().isNoContent());
 
-		// Dopo il logout il frontend puo' riottenere token/cookie freschi.
 		MvcResult afterLogout = mockMvc.perform(get("/api/auth/csrf"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.token").isNotEmpty())
@@ -205,6 +206,7 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
 		assertThat(JsonTestSupport.extractString(afterLogout.getResponse().getContentAsString(), "token")).isNotBlank();
 	}
 
+	// Richiesta che cambia dati senza token: CSRF_INVALID.
 	@Test
 	void unsafeRequestWithoutCsrfTokenReturnsCsrfInvalid() throws Exception {
 		mockMvc.perform(post("/api/auth/register")
@@ -216,6 +218,7 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("CSRF_INVALID"));
 	}
 
+	// Senza login, prenotare dà 401 in JSON e non un redirect.
 	@Test
 	void anonymousBookingWithValidCsrfIsJson401NotRedirect() throws Exception {
 		persistPublishedFutureEvent("Evento anonimo", 5);
@@ -228,6 +231,7 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("UNAUTHENTICATED"));
 	}
 
+	// Senza login e senza token: CSRF_INVALID.
 	@Test
 	void anonymousBookingWithoutCsrfIsCsrfInvalid() throws Exception {
 		mockMvc.perform(post("/api/bookings")
@@ -237,23 +241,21 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
 				.andExpect(jsonPath("$.code").value("CSRF_INVALID"));
 	}
 
+	// Le pagine admin sono chiuse ai visitatori e aperte solo all'admin.
 	@Test
 	void adminEndpointsEnforceRole() throws Exception {
 		AppUser admin = createAdmin("admin@example.com");
 		AppUser visitor = createVisitor("visitor@example.com");
 
-		// Anonimo -> 401 JSON, mai 302.
 		mockMvc.perform(get("/api/admin/events"))
 				.andExpect(status().isUnauthorized())
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.code").value("UNAUTHENTICATED"));
 
-		// Visitatore autenticato -> 403.
 		mockMvc.perform(get("/api/admin/events").with(user(principalOf(visitor))))
 				.andExpect(status().isForbidden())
 				.andExpect(jsonPath("$.code").value("FORBIDDEN"));
 
-		// Admin -> 200.
 		mockMvc.perform(get("/api/admin/events").with(user(principalOf(admin))))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.page").value(0));

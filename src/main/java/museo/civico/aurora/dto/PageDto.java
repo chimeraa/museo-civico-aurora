@@ -4,11 +4,10 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 
-/**
- * DTO di pagina del contratto: indici 0-based.
- */
+// Una pagina di risultati. Le pagine partono da 0.
 public record PageDto<T>(List<T> content, int page, int size, long totalElements, int totalPages) {
 
+	// Crea la pagina partendo da quella di Spring.
 	public static <T> PageDto<T> of(Page<?> source, List<T> content) {
 		return new PageDto<>(content, source.getNumber(), source.getSize(), source.getTotalElements(),
 				source.getTotalPages());

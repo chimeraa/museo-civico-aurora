@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import museo.civico.aurora.domain.EventStatus;
 
-/** Richiesta di creazione evento; {@code status} opzionale (default DRAFT). */
+// Dati per creare un evento. Se lo stato manca, l'evento diventa bozza.
 public record EventCreateRequest(
 		@NotBlank @Size(min = 1, max = 160) String title,
 		@Size(max = 5000) String description,

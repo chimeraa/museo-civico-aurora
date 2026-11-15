@@ -3,12 +3,13 @@ package museo.civico.aurora.support;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** Estrazione minima di valori numerici da JSON nei test. */
+// Piccole funzioni per leggere un valore dal JSON nei test.
 public final class JsonTestSupport {
 
 	private JsonTestSupport() {
 	}
 
+	// Legge un numero dal JSON.
 	public static long extractLong(String json, String field) {
 		Matcher matcher = Pattern.compile("\"" + Pattern.quote(field) + "\"\\s*:\\s*(\\d+)").matcher(json);
 		if (matcher.find()) {
@@ -17,6 +18,7 @@ public final class JsonTestSupport {
 		throw new IllegalArgumentException("Campo numerico '" + field + "' assente nel JSON: " + json);
 	}
 
+	// Legge una stringa dal JSON.
 	public static String extractString(String json, String field) {
 		Matcher matcher = Pattern.compile("\"" + Pattern.quote(field) + "\"\\s*:\\s*\"([^\"]*)\"").matcher(json);
 		if (matcher.find()) {

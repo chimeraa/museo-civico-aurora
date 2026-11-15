@@ -14,9 +14,7 @@ import museo.civico.aurora.api.ErrorCode;
 import museo.civico.aurora.api.ErrorEnvelope;
 import tools.jackson.databind.json.JsonMapper;
 
-/**
- * Login fallito: risposta JSON 401 con envelope, nessun redirect.
- */
+// Login sbagliato: risposta 401 in JSON.
 @Component
 public class JsonLoginFailureHandler implements AuthenticationFailureHandler {
 

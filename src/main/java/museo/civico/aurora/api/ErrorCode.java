@@ -1,9 +1,6 @@
 package museo.civico.aurora.api;
 
-/**
- * Codici applicativi dell'error envelope. Devono restare allineati al contratto
- * {@code docs/api-contract.md}.
- */
+// Lista dei codici di errore. Il frontend li legge per capire cosa è successo.
 public final class ErrorCode {
 
 	public static final String VALIDATION_ERROR = "VALIDATION_ERROR";
@@ -30,6 +27,7 @@ public final class ErrorCode {
 	public static final String CONFLICT = "CONFLICT";
 	public static final String INTERNAL_ERROR = "INTERNAL_ERROR";
 
+	// Classe di sole costanti: non serve crearla.
 	private ErrorCode() {
 	}
 }

@@ -4,20 +4,19 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 
-/**
- * Eccezione applicativa mappata sull'error envelope dal
- * {@link GlobalExceptionHandler}.
- */
+// Errore nostro, con un codice e uno stato HTTP. Lo prende GlobalExceptionHandler.
 public class ApiException extends RuntimeException {
 
 	private final HttpStatus status;
 	private final String code;
 	private final List<FieldError> fieldErrors;
 
+	// Versione semplice, senza errori sui singoli campi.
 	public ApiException(HttpStatus status, String code, String message) {
 		this(status, code, message, List.of());
 	}
 
+	// Versione con anche gli errori dei campi.
 	public ApiException(HttpStatus status, String code, String message, List<FieldError> fieldErrors) {
 		super(message);
 		this.status = status;

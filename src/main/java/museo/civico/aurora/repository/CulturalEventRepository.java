@@ -14,8 +14,10 @@ import jakarta.persistence.LockModeType;
 import museo.civico.aurora.domain.CulturalEvent;
 import museo.civico.aurora.domain.EventStatus;
 
+// Accesso al database per gli eventi.
 public interface CulturalEventRepository extends JpaRepository<CulturalEvent, Long> {
 
+	// Eventi con un certo stato, a pagine.
 	Page<CulturalEvent> findByStatus(EventStatus status, Pageable pageable);
 
 	Page<CulturalEvent> findByStatusAndStartsAtGreaterThanEqual(EventStatus status, OffsetDateTime from, Pageable pageable);
@@ -25,16 +27,20 @@ public interface CulturalEventRepository extends JpaRepository<CulturalEvent, Lo
 	Page<CulturalEvent> findByStatusAndStartsAtBetween(EventStatus status, OffsetDateTime from, OffsetDateTime to,
 			Pageable pageable);
 
+	// Trova l'evento e lo blocca, così due persone non lo cambiano insieme.
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("select e from CulturalEvent e where e.id = :id")
 	Optional<CulturalEvent> findByIdForUpdate(@Param("id") Long id);
 
+	// Quanti eventi hanno quello stato.
 	long countByStatus(EventStatus status);
 
+	// Quanti eventi con quello stato non sono ancora iniziati.
 	long countByStatusAndStartsAtGreaterThanEqual(EventStatus status, OffsetDateTime now);
 
 	@Query("select coalesce(sum(e.capacity), 0) from CulturalEvent e "
 			+ "where e.status = :status and e.startsAt >= :now")
+	// Somma dei posti degli eventi futuri con quello stato.
 	long sumCapacityByStatusAndStartsAtGreaterThanEqual(@Param("status") EventStatus status,
 			@Param("now") OffsetDateTime now);
 }

@@ -14,6 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+// Una prenotazione: un utente prenota un posto per un evento.
 @Entity
 @Table(name = "booking")
 public class Booking {
@@ -40,10 +41,11 @@ public class Booking {
 	@Column(name = "cancelled_at")
 	private OffsetDateTime cancelledAt;
 
+	// Costruttore vuoto per JPA.
 	protected Booking() {
-		// richiesto da JPA
 	}
 
+	// Crea una nuova prenotazione.
 	public Booking(CulturalEvent event, AppUser user, BookingStatus status, OffsetDateTime createdAt) {
 		this.event = event;
 		this.user = user;

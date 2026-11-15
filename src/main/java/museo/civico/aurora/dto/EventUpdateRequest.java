@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import museo.civico.aurora.domain.EventStatus;
 
-/** PUT sostitutivo: tutti i campi modificabili obbligatori, incluso lo stato. */
+// Dati per modificare un evento. Tutti i campi sono obbligatori, anche lo stato.
 public record EventUpdateRequest(
 		@NotBlank @Size(min = 1, max = 160) String title,
 		@Size(max = 5000) String description,

@@ -26,6 +26,7 @@ import museo.civico.aurora.repository.CulturalEventRepository;
 import museo.civico.aurora.repository.FeedbackRepository;
 import museo.civico.aurora.security.AppUserPrincipal;
 
+// Logica dei giudizi.
 @Service
 public class FeedbackService {
 
@@ -44,11 +45,12 @@ public class FeedbackService {
 		this.clock = clock;
 	}
 
+	// Salva il giudizio. Solo per eventi pubblicati e una sola volta per utente.
 	@Transactional
 	public FeedbackDto create(AppUserPrincipal principal, Long eventId, FeedbackCreateRequest request) {
 		CulturalEvent event = events.findById(eventId).orElseThrow(FeedbackService::notFound);
+		// Bozze e annullati non si possono giudicare.
 		if (event.getStatus() != EventStatus.PUBLISHED) {
-			// Bozze e annullati non sono giudicabili; gli eventi conclusi si'.
 			throw notFound();
 		}
 
@@ -56,6 +58,7 @@ public class FeedbackService {
 		Feedback feedback = new Feedback(event, user, request.rating(), trimToNull(request.comment()),
 				OffsetDateTime.now(clock));
 		try {
+			// Se l'utente ha già giudicato, il database blocca qui.
 			feedback = feedbacks.saveAndFlush(feedback);
 		}
 		catch (DataIntegrityViolationException ex) {
@@ -65,6 +68,7 @@ public class FeedbackService {
 		return toDto(feedback);
 	}
 
+	// Giudizi di un evento per l'admin, a pagine.
 	@Transactional(readOnly = true)
 	public PageDto<FeedbackDto> listForEvent(Long eventId, int page, int size) {
 		if (!events.existsById(eventId)) {
@@ -76,11 +80,13 @@ public class FeedbackService {
 		return PageDto.of(result, content);
 	}
 
+	// Converte il giudizio nel formato da mostrare, senza email.
 	private static FeedbackDto toDto(Feedback feedback) {
 		return new FeedbackDto(feedback.getId(), feedback.getEvent().getId(), feedback.getUser().getDisplayName(),
 				feedback.getRating(), feedback.getComment(), feedback.getCreatedAt());
 	}
 
+	// Toglie gli spazi. Se resta vuoto, restituisce null.
 	private static String trimToNull(String value) {
 		if (value == null) {
 			return null;
@@ -89,6 +95,7 @@ public class FeedbackService {
 		return trimmed.isEmpty() ? null : trimmed;
 	}
 
+	// Errore 404 generico.
 	private static ApiException notFound() {
 		return new ApiException(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, "Risorsa non trovata.");
 	}
