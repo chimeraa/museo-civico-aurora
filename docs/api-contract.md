@@ -227,7 +227,7 @@ Il prototipo non presenta una dashboard grafica.
 - Il campo `username` del form login contiene l'email registrata; `UserDetailsService` normalizza la stessa email del flusso registration.
 - L'API `SecurityFilterChain` usa entry point JSON `401` e access denied handler JSON `403`; entrambi producono l'error envelope definito sopra. L'access denied handler riconosce `CsrfException` e restituisce `403 CSRF_INVALID`; gli altri dinieghi sono `403 FORBIDDEN`. `formLogin` contribuisce normalmente un entry point redirect: sovrascriverlo per `/api/**`. `@ControllerAdvice` non intercetta le eccezioni lanciate dai filtri.
 - API anonime restituiscono `401` JSON; l'utente autenticato privo del ruolo richiesto riceve `403` JSON. Testare esplicitamente anonymous admin `401`, visitatore admin `403` e assenza di `302`.
-- Password codificate con `BCryptPasswordEncoder`; accettare lunghezza in byte non superiore al limite BCrypt (72 byte). Nessuna password, secret o dato utente reale è hardcoded.
+- Password codificate con `BCryptPasswordEncoder`; accettare lunghezza in byte non superiore al limite BCrypt (72 byte). Nessuna credenziale amministrativa o dato utente reale è hardcoded; la creazione dell'admin richiede variabili d'ambiente non vuote nel profilo `dev`.
 - Account amministratore inizializzato solo da variabili d'ambiente `APP_ADMIN_EMAIL` e `APP_ADMIN_PASSWORD` in profilo locale/dev; se mancanti, non creare credenziali predefinite. Non loggare password o hash.
 - Cookie sessione HttpOnly e SameSite=Lax (SameSite va configurato esplicitamente); `Secure=false` solo per HTTP locale e abilitato in deployment HTTPS. Protezione anti-session-fixation di default mantenuta.
 

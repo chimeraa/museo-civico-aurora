@@ -106,25 +106,18 @@ Una volta avviata l'applicazione, è possibile accedere a:
 
 ## Account amministratore
 
-Il progetto prevede un account amministratore con le seguenti credenziali predefinite:
+Non sono configurate credenziali amministrative predefinite. Per creare un amministratore locale, imposta `APP_ADMIN_EMAIL` e `APP_ADMIN_PASSWORD` e avvia l'applicazione con il profilo `dev`. La password deve avere almeno 8 caratteri e non superare 72 byte UTF-8.
 
-| Campo | Valore |
-|---|---|
-| Email | `admin@admin.it` |
-| Password | `admin` |
-
-Le credenziali possono essere personalizzate tramite le variabili d'ambiente `APP_ADMIN_EMAIL` e `APP_ADMIN_PASSWORD`.
-
-L'account viene inizializzato all'avvio secondo la configurazione del profilo di sviluppo (`dev`).
-
-Per modificare le credenziali su Windows (PowerShell):
+Su Windows (PowerShell), sostituisci il valore segnaposto con una password locale adeguata:
 
 ```powershell
 $env:APP_ADMIN_EMAIL = "admin@admin.it"
-$env:APP_ADMIN_PASSWORD = "admin"
+$env:APP_ADMIN_PASSWORD = "<scegli-una-password-di-almeno-8-caratteri>"
 
 .\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=dev"
 ```
+
+Se le variabili non sono impostate, l'account amministratore non viene creato. Non usare credenziali di esempio in ambienti condivisi o di produzione.
 
 ## Configurazione HTTPS
 
