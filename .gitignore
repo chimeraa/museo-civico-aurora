@@ -12,7 +12,6 @@ target/
 *.local.yaml
 application-local.properties
 application-local.yml
-application-*.local.properties
 application-*.local.yml
 secrets/
 

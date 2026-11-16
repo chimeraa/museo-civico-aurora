@@ -1,171 +1,199 @@
-# Museo Civico Aurora — "Aurora Cultura"
+# Museo Civico Aurora - Aurora Cultura
 
-Prototipo **"Aurora Cultura"** per il **Museo Civico Aurora**: una piattaforma informatica per la gestione di **eventi, prenotazioni e utenti** di un'impresa culturale. Il progetto è sviluppato come **Project Work del CdS L-31** (Informatica per le Aziende Digitali), in risposta alla **Traccia n. 22**.
+Aurora Cultura è un progetto realizzato per il Project Work del corso di laurea L-31 in Informatica per le Aziende Digitali, seguendo la Traccia n. 22.
 
-> **Nota sul contesto:** si tratta di un **prototipo didattico** ambientato in un **museo simulato**; tutti i **dati sono fittizi** e non riferibili a persone o organizzazioni reali.
+Si tratta di una piattaforma web pensata per gestire le attività di un museo, in particolare eventi, prenotazioni e utenti.
 
----
+Il museo è inventato e tutti i dati utilizzati nel progetto sono fittizi. L'applicazione è stata sviluppata a scopo didattico.
 
-## Stack tecnologico
+## Tecnologie utilizzate
 
 | Ambito | Tecnologia |
 |---|---|
 | Linguaggio | Java 21 |
 | Framework | Spring Boot 4.1.1 |
 | Sicurezza | Spring Security 7.1.1 |
-| Build | Maven Wrapper (distribuzione Maven 3.9.16, `mvnw` / `mvnw.cmd` committati) |
+| Build | Maven Wrapper 3.9.16 |
 | Database | PostgreSQL 17 |
-| Migrazioni | Flyway (fonte unica dello schema) |
-| Persistenza | JPA / Hibernate (`ddl-auto=validate`) |
+| Migrazioni | Flyway |
+| Persistenza | JPA / Hibernate |
 | Serializzazione | Jackson 3 |
-| Frontend | HTML / CSS / JavaScript statico servito dalla stessa applicazione |
-
----
+| Frontend | HTML, CSS e JavaScript |
 
 ## Prerequisiti
 
-- **JDK 21** installato e raggiungibile (`java -version`).
-- **Nessuna installazione globale di Maven**: si usa il **Maven Wrapper** committato nel repository.
-- **PowerShell** o un terminale per i comandi di build/avvio.
-- **PostgreSQL 17** — richiesto **solo per l'esecuzione runtime** dell'applicazione.
+Per eseguire il progetto servono:
 
-> I **test NON richiedono** PostgreSQL locale, Docker o credenziali esterne: avviano un'istanza PostgreSQL embedded.
+- JDK 21 installato.
+- PowerShell oppure un terminale.
+- PostgreSQL 17.
 
----
+Non è necessario installare Maven, perché nel progetto è già presente il Maven Wrapper.
+
+Per eseguire i test non serve installare PostgreSQL né Docker. I test utilizzano una versione embedded di PostgreSQL che viene avviata automaticamente.
 
 ## Build e test
 
-Eseguire dal root del progetto `museo-civico-aurora/`.
+I comandi vanno eseguiti dalla cartella principale del progetto (`museo-civico-aurora`).
 
-**Windows (PowerShell):**
+Windows (PowerShell):
+
 ```powershell
 .\mvnw.cmd -B verify
 ```
 
-**Unix / macOS:**
+Linux / macOS:
+
 ```bash
 ./mvnw -B verify
 ```
 
-I test di integrazione avviano un **PostgreSQL 17.2 embedded** tramite la libreria **Zonky** (`io.zonky.test:embedded-postgres`). L'istanza viene avviata prima del contesto Spring e chiusa a fine test; non serve **Docker**, **Testcontainers** né una configurazione del PostgreSQL locale. Il profilo di test abilita Flyway e usa `ddl-auto=validate`.
+Il comando esegue la compilazione e tutti i test.
 
----
+Per i test di integrazione viene utilizzato PostgreSQL 17.2 embedded tramite la libreria Zonky (`io.zonky.test:embedded-postgres`). Il database viene avviato automaticamente durante i test e chiuso al termine.
 
-## Architettura e diagrammi
+Non servono quindi un database locale, Docker o credenziali esterne per eseguire i test.
 
-I diagrammi di progetto sono raccolti in [`docs/diagrams/`](docs/diagrams/): modello entità-relazione, architettura a strati, sequenza di prenotazione con controllo della capienza, flusso di login e protezione CSRF. Le sorgenti Mermaid sono in [`docs/diagrams/diagrammi.md`](docs/diagrams/diagrammi.md); le immagini PNG sono le stesse utilizzate nel documento di consegna.
+## Configurazione del database
 
----
+L'applicazione utilizza PostgreSQL 17.
 
-## Configurazione runtime
+La configurazione predefinita è già presente nel progetto:
 
-Le credenziali del database provengono **solo da variabili d'ambiente**; i valori di fallback presenti in `application.properties` **non sono segreti**:
-
-| Variabile | Default nel repository |
+| Parametro | Valore |
 |---|---|
-| `DB_URL` | `jdbc:postgresql://localhost:5432/museo_civico_aurora` |
-| `DB_USERNAME` | `postgres` |
-| `DB_PASSWORD` | *(vuoto)* |
+| Database | `museo_civico_aurora` |
+| Utente | `postgres` |
+| Password | `postgres` |
+| Indirizzo | `localhost:5432` |
 
-Prima dell'avvio creare **un database e un ruolo dedicati**, ad esempio:
+È sufficiente avere PostgreSQL installato e in esecuzione. Non è necessario modificare la configurazione se si utilizzano questi valori.
 
-```sql
-CREATE ROLE museo_app LOGIN PASSWORD '<<password-locale>>';
-CREATE DATABASE museo_civico_aurora OWNER museo_app;
-```
+Se si preferisce utilizzare credenziali diverse, è possibile modificarle tramite variabili d'ambiente:
 
-Esempio di valorizzazione in PowerShell (nessun segreto va committato):
+- `DB_URL`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+
+Ad esempio, su Windows (PowerShell):
 
 ```powershell
-$env:DB_URL      = "jdbc:postgresql://localhost:5432/museo_civico_aurora"
-$env:DB_USERNAME = "museo_app"
-$env:DB_PASSWORD = "<<password-locale>>"
+$env:DB_URL = "jdbc:postgresql://localhost:5432/museo_civico_aurora"
+$env:DB_USERNAME = "postgres"
+$env:DB_PASSWORD = "postgres"
 ```
-
-> **Nessuna password, secret o credenziale reale è presente nel repository.** Non committare file `.env` o configurazioni locali.
-
----
 
 ## Avvio dell'applicazione
 
-**Windows (PowerShell):**
+Dopo aver avviato PostgreSQL, è possibile avviare il progetto.
+
+Windows (PowerShell):
+
 ```powershell
 .\mvnw.cmd spring-boot:run
 ```
 
-**Unix / macOS:**
+Linux / macOS:
+
 ```bash
 ./mvnw spring-boot:run
 ```
 
-Una volta avviata l'applicazione:
+Una volta avviata l'applicazione, è possibile accedere a:
 
-- **Frontend:** <http://localhost:8080/>
-- **API:** <http://localhost:8080/api/...>
-
----
+- Frontend: http://localhost:8080/
+- API: http://localhost:8080/api/
 
 ## Account amministratore
 
-L'account amministratore viene creato **solo** quando è attivo il profilo **`dev`** e sono valorizzate **entrambe** le variabili `APP_ADMIN_EMAIL` e `APP_ADMIN_PASSWORD`. Se mancano, **non viene creata alcuna credenziale predefinita**.
+Il progetto prevede un account amministratore con le seguenti credenziali predefinite:
 
-La password deve rispettare i requisiti applicativi: almeno **8 caratteri** e non oltre **72 byte UTF-8**.
+| Campo | Valore |
+|---|---|
+| Email | `admin@admin.it` |
+| Password | `admin` |
 
-**Windows (PowerShell):**
+Le credenziali possono essere personalizzate tramite le variabili d'ambiente `APP_ADMIN_EMAIL` e `APP_ADMIN_PASSWORD`.
+
+L'account viene inizializzato all'avvio secondo la configurazione del profilo di sviluppo (`dev`).
+
+Per modificare le credenziali su Windows (PowerShell):
+
 ```powershell
-$env:APP_ADMIN_EMAIL    = "admin@example.org"
-$env:APP_ADMIN_PASSWORD = "<<password-almeno-8-caratteri>>"
+$env:APP_ADMIN_EMAIL = "admin@admin.it"
+$env:APP_ADMIN_PASSWORD = "admin"
+
 .\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=dev"
 ```
 
-**Unix / macOS:**
-```bash
-APP_ADMIN_EMAIL=admin@example.org \
-APP_ADMIN_PASSWORD='<<password-almeno-8-caratteri>>' \
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
-```
+## Configurazione HTTPS
 
----
+È disponibile anche un profilo `https`, definito nel file `application-https.properties`.
 
-## Profilo HTTPS
+Questo profilo abilita l'attributo `Secure` sui cookie di sessione e CSRF, da utilizzare quando l'applicazione viene eseguita tramite HTTPS.
 
-Il profilo **`https`** (`application-https.properties`) imposta l'attributo **`Secure`** sul cookie di sessione e sul cookie CSRF. Va attivato, ad esempio, con:
+Per attivarlo:
 
 ```bash
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=https
 ```
 
-I cookie mantengono **`SameSite=Lax`** e la sessione resta **HttpOnly**. In locale su HTTP l'attributo `Secure` è disattivato; va abilitato solo in deployment HTTPS.
+I cookie utilizzano inoltre `SameSite=Lax` e quello di sessione mantiene l'attributo `HttpOnly`.
 
----
+In ambiente locale, utilizzando HTTP, l'attributo `Secure` rimane disattivato.
 
-## Flusso frontend / API (in breve)
+## Login e comunicazione con le API
 
-1. Il client recupera il token CSRF con **`GET /api/auth/csrf`**; la risposta contiene token, nome header (`X-XSRF-TOKEN`) e materializza il cookie `XSRF-TOKEN`.
-2. Il login usa **`POST /api/auth/login`** con body **`application/x-www-form-urlencoded`** (campi `username` = email registrata e `password`). La risposta è **JSON** (`200` / `401`), senza redirect HTML.
-3. Le richieste di modifica inviano l'header **`X-XSRF-TOKEN`**; dopo login/logout il token viene invalidato/ruotato e va recuperato di nuovo.
+Il frontend comunica con il backend attraverso le API REST.
 
-Gli **endpoint principali** (eventi pubblici, prenotazioni, area amministrativa, feedback, statistiche) e i relativi DTO, codici di errore e regole sono definiti nel contratto **[`docs/api-contract.md`](docs/api-contract.md)**.
+Il login e la gestione della protezione CSRF funzionano in questo modo:
 
----
+1. Il frontend richiede il token CSRF tramite `GET /api/auth/csrf`.
+2. L'utente effettua il login tramite `POST /api/auth/login`, inviando email e password.
+3. Il backend restituisce una risposta JSON con esito positivo (`200`) oppure negativo (`401`).
+4. Le richieste che modificano i dati devono includere il token CSRF nell'header `X-XSRF-TOKEN`.
 
-## Migrazioni database
+Dopo il login e il logout il token viene aggiornato e deve essere richiesto nuovamente.
 
-Lo schema è governato **esclusivamente da Flyway**, con le migrazioni in `src/main/resources/db/migration` (attualmente `V1__init.sql`). Hibernate è configurato con **`ddl-auto=validate`**: non crea né modifica tabelle, si limita a **validare** lo schema migrato.
+Per conoscere tutti gli endpoint disponibili, i parametri, i DTO e i codici di risposta è possibile consultare il file [docs/api-contract.md](docs/api-contract.md).
 
----
+## Struttura e diagrammi
 
-## Limiti e note
+Nella cartella `docs/diagrams/` si trovano i diagrammi realizzati per il progetto:
 
-- Prototipo **didattico**: non è un sistema pronto per la produzione.
-- **Nessun pagamento**, invio di **email/notifiche**, **upload di immagini** o **recupero password**.
-- Il **feedback** non è legato alla prova di effettiva partecipazione all'evento.
-- Paginazione limitata a pagina/dimensione, con **`size` massimo 50**.
-- I **test browser/E2E non sono automatizzati**.
-- Nessuna configurazione CORS e nessun API versioning nell'MVP.
+- Modello entità-relazione.
+- Architettura dell'applicazione.
+- Sequenza di prenotazione e controllo della capienza.
+- Login.
+- Protezione CSRF.
 
----
+I diagrammi sono disponibili sia in formato Mermaid (`diagrammi.md`) sia come immagini PNG. Le immagini sono le stesse inserite nel documento del Project Work.
 
-## Riferimenti al Project Work
+## Database e migrazioni
 
-Il repository è l'**artefatto complementare** del Project Work. Il **documento di consegna** (template universitario compilato) e il **brief dell'assegnazione** sono materiali esterni al repository e **non** sono inclusi in questa cartella.
+La struttura del database viene gestita tramite Flyway. Le migrazioni si trovano in:
+
+`src/main/resources/db/migration`
+
+Attualmente è presente la migrazione iniziale `V1__init.sql`.
+
+Hibernate utilizza la modalità `ddl-auto=validate`, quindi non crea o modifica le tabelle, ma controlla che la struttura del database corrisponda alle entità definite nel progetto.
+
+## Limiti del progetto
+
+L'applicazione è un prototipo realizzato a scopo didattico. In questa versione non sono previste alcune funzionalità:
+
+- Non sono presenti sistemi di pagamento.
+- Non è previsto l'invio di email o notifiche.
+- Non è possibile caricare immagini.
+- Non è disponibile il recupero della password.
+- I feedback non verificano che l'utente abbia effettivamente partecipato all'evento.
+- La dimensione massima delle pagine restituite dalle API è 50 elementi.
+- Non sono presenti test automatici per il browser e per i flussi completi dell'interfaccia.
+- Non è stata implementata una configurazione CORS né il versionamento delle API.
+
+## Project Work
+
+Questo repository contiene il codice sorgente dell'applicazione realizzata per il Project Work.
+
+Il documento finale di consegna e la traccia assegnata sono separati dal codice e non sono inclusi nel repository.
